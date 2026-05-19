@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dimension": "compliance",
+    "n": 9,
+    "mean": 14.333333333333334,
+    "median": 17.0,
+    "ci_lower": 7.222222222222222,
+    "ci_upper": 20.555555555555557,
+    "std": 9.977753031397178
+  },
+  "production_ops": {
+    "dimension": "production_ops",
+    "n": 9,
+    "mean": 14.666666666666666,
+    "median": 18.0,
+    "ci_lower": 6.888888888888889,
+    "ci_upper": 21.333333333333332,
+    "std": 10.873004286866728
+  },
+  "scalability": {
+    "dimension": "scalability",
+    "n": 9,
+    "mean": 41.333333333333336,
+    "median": 44.0,
+    "ci_lower": 30.666666666666668,
+    "ci_upper": 52.0,
+    "std": 16.438437341250605
+  },
+  "cost_efficiency": {
+    "dimension": "cost_efficiency",
+    "n": 9,
+    "mean": 43.333333333333336,
+    "median": 42.0,
+    "ci_lower": 38.0,
+    "ci_upper": 49.111111111111114,
+    "std": 8.219218670625303
+  },
+  "security": {
+    "dimension": "security",
+    "n": 9,
+    "mean": 20.0,
+    "median": 20.0,
+    "ci_lower": 20.0,
+    "ci_upper": 20.0,
+    "std": 0.0
+  }
+}

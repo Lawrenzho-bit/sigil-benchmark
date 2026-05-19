@@ -1,0 +1,14 @@
+{
+  "task_01_b2b_portal": {
+    "task_id": "task_01_b2b_portal",
+    "n_runs": 9,
+    "composite_mean": 133.66666666666666,
+    "composite_std": 45.20570268843916,
+    "tools_evaluated": [
+      "bolt-vibe-coded",
+      "claude-sonnet-4-5",
+      "sigil-deploy"
+    ],
+    "differentiation_score": 45.20570268843916
+  }
+}

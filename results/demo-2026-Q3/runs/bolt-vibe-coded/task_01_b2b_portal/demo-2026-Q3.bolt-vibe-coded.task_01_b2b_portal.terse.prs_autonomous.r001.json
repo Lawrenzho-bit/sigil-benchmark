@@ -1,0 +1,723 @@
+{
+  "run_id": "demo-2026-Q3.bolt-vibe-coded.task_01_b2b_portal.terse.prs_autonomous.r001",
+  "cycle_id": "demo-2026-Q3",
+  "tool_id": "bolt-vibe-coded",
+  "task_id": "task_01_b2b_portal",
+  "variant": "terse",
+  "mode": "prs_autonomous",
+  "repetition": 1,
+  "started_at": "2026-05-19T07:31:25.069944Z",
+  "completed_at": "2026-05-19T07:31:25.149536Z",
+  "tool_output": {
+    "tool_id": "bolt-vibe-coded",
+    "model": "bolt-vibe-coded",
+    "mode": "prs_autonomous",
+    "prompt": "(demo)",
+    "output_files": {
+      "package.json": "{\n  \"name\": \"app\",\n  \"dependencies\": {\n    \"express\": \"4.18.2\",\n    \"stripe\": \"16.7.0\"\n  }\n}",
+      "index.js": "const express = require('express');\nconst stripe = require('stripe')('sk_test_HARDCODED_KEY_HERE');\nconst app = express();\napp.use(express.json());\n\n// Auth: just trust whatever the client sends\napp.post('/login', (req, res) => {\n  res.cookie('userId', req.body.userId); // no security flags\n  res.send('logged in');\n});\n\n// SQL injection waiting to happen\napp.get('/users/:id', async (req, res) => {\n  const sql = \\`SELECT * FROM users WHERE id = \\${req.params.id}\\`;\n  const result = await db.query(sql);\n  res.json(result);\n});\n\n// Webhook with no signature validation\napp.post('/stripe/webhook', (req, res) => {\n  const event = req.body;\n  if (event.type === 'invoice.paid') {\n    // process...\n  }\n  res.send('ok');\n});\n\napp.listen(8080); // no health check, no graceful shutdown\n"
+    },
+    "output_archive_path": null,
+    "completion_status": "complete",
+    "refusal_reason": null,
+    "tokens_input": 2000,
+    "tokens_output": 10000,
+    "wall_clock_seconds": 42.0,
+    "generated_at": "2026-05-19T07:31:25.069944Z",
+    "raw_response": null
+  },
+  "deployment": {
+    "run_id": "demo-bolt-vibe-coded-1",
+    "target": "demo",
+    "success": true,
+    "deployed_at": "2026-05-19T07:31:25.069944Z",
+    "public_url": "http://localhost:1234",
+    "internal_endpoint": null,
+    "deployment_logs": "",
+    "container_image": null,
+    "build_duration_seconds": null,
+    "failure_reason": null,
+    "cost_usd": 0.0,
+    "metadata": {}
+  },
+  "scores": {
+    "security": {
+      "dimension_id": "security",
+      "dimension_name": "Security",
+      "sub_component_scores": [
+        {
+          "sub_component_id": "sec_01_static_analysis",
+          "name": "Static analysis findings",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "semgrep",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "Semgrep not installed locally; sub-component skipped"
+        },
+        {
+          "sub_component_id": "sec_02_dependency_cves",
+          "name": "Dependency CVE count",
+          "score": 10.0,
+          "method": "automated",
+          "tool_used": "npm_audit_unavailable",
+          "raw_findings": {
+            "critical": 0,
+            "high": 0
+          },
+          "rubric_match": "0 high/critical CVEs",
+          "notes": null
+        },
+        {
+          "sub_component_id": "sec_08_secret_management",
+          "name": "Secret management",
+          "score": 10.0,
+          "method": "automated",
+          "tool_used": "regex_fallback",
+          "raw_findings": {
+            "hardcoded_secrets_found": 0
+          },
+          "rubric_match": "All secrets in env/secret-manager",
+          "notes": "gitleaks unavailable; used regex fallback"
+        },
+        {
+          "sub_component_id": "sec_03_auth_correctness",
+          "name": "Authentication correctness (OWASP ASVS L1)",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "owasp_asvs_l1_suite",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold — not yet implemented. Returns 0 by default."
+        },
+        {
+          "sub_component_id": "sec_04_input_validation",
+          "name": "Input validation coverage",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "harness_probe",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold — not yet implemented. Returns 0 by default."
+        },
+        {
+          "sub_component_id": "sec_05_sqli_resistance",
+          "name": "SQL injection resistance",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "owasp_zap+sqlmap",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold — not yet implemented. Returns 0 by default."
+        },
+        {
+          "sub_component_id": "sec_06_xss_prevention",
+          "name": "XSS prevention",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "owasp_zap",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold — not yet implemented. Returns 0 by default."
+        },
+        {
+          "sub_component_id": "sec_07_csrf_protection",
+          "name": "CSRF protection",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "harness_probe",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold — not yet implemented. Returns 0 by default."
+        },
+        {
+          "sub_component_id": "sec_09_tls_config",
+          "name": "TLS/HTTPS configuration",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "testssl_sh",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold — not yet implemented. Returns 0 by default."
+        },
+        {
+          "sub_component_id": "sec_10_rate_limiting",
+          "name": "Rate limiting",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "harness_probe",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold — not yet implemented. Returns 0 by default."
+        }
+      ],
+      "dimension_score": 20.0,
+      "scored_at": "2026-05-19T07:31:25.143225Z",
+      "scoring_duration_seconds": 0.07900000002700835
+    },
+    "production_ops": {
+      "dimension_id": "production_ops",
+      "dimension_name": "Production Readiness Ops",
+      "sub_component_scores": [
+        {
+          "sub_component_id": "ops_02_observability",
+          "name": "Observability",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "structured_logging": false,
+            "metrics": false,
+            "tracing": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "ops_03_health_checks",
+          "name": "Health checks",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "endpoints_found": [],
+            "has_dep_checks": false,
+            "has_separate_ready_live": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "ops_04_backup_strategy",
+          "name": "Backup strategy",
+          "score": 0.0,
+          "method": "manual_review",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "has_backup_script": false,
+            "has_backup_doc": false,
+            "has_schedule": false,
+            "mentions_restore": false
+          },
+          "rubric_match": "None",
+          "notes": "Static analysis only; manual review needed to verify backups actually run"
+        },
+        {
+          "sub_component_id": "ops_05_db_pooling",
+          "name": "DB connection pooling",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "explicit_pool": false,
+            "max_connections": false,
+            "timeout": false
+          },
+          "rubric_match": "Single connection",
+          "notes": null
+        },
+        {
+          "sub_component_id": "ops_07_cache_strategy",
+          "name": "Cache strategy",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "cache_layer": false,
+            "ttl": false,
+            "invalidation": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "ops_09_deployment_automation",
+          "name": "Deployment automation",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "has_ci_file": false,
+            "has_cd": false,
+            "has_rollback": false
+          },
+          "rubric_match": "Nothing",
+          "notes": null
+        },
+        {
+          "sub_component_id": "ops_10_time_correctness",
+          "name": "Time correctness",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "utc": false,
+            "tz_aware": false,
+            "naive_red_flag": false
+          },
+          "rubric_match": "TZ ignored",
+          "notes": null
+        },
+        {
+          "sub_component_id": "ops_01_error_handling",
+          "name": "Error handling (fuzz testing)",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "harness_fuzzer",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires active deployment to test. Returns 0 until deployment harness is operational."
+        },
+        {
+          "sub_component_id": "ops_06_n_plus_one",
+          "name": "N+1 query detection",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "query_analyzer",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires active deployment to test. Returns 0 until deployment harness is operational."
+        },
+        {
+          "sub_component_id": "ops_08_graceful_degradation",
+          "name": "Graceful degradation",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "chaos_test",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires active deployment to test. Returns 0 until deployment harness is operational."
+        }
+      ],
+      "dimension_score": 0.0,
+      "scored_at": "2026-05-19T07:31:25.144562Z",
+      "scoring_duration_seconds": 0.0
+    },
+    "compliance": {
+      "dimension_id": "compliance",
+      "dimension_name": "Compliance",
+      "sub_component_scores": [
+        {
+          "sub_component_id": "comp_01_cookie_consent",
+          "name": "GDPR cookie consent",
+          "score": 1.0,
+          "method": "hybrid",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "has_library": false,
+            "has_banner_component": false,
+            "has_preferences": false,
+            "blocks_tracking_heuristic": false,
+            "records_consent": false
+          },
+          "rubric_match": "P=0/3 F=0/4 D=1/3",
+          "notes": "Functionality tier 4 requires deployment + network log verification"
+        },
+        {
+          "sub_component_id": "comp_02_privacy_policy",
+          "name": "Privacy policy",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_file_analysis",
+          "raw_findings": {
+            "file": null
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_03_terms_of_service",
+          "name": "Terms of service",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_file_analysis",
+          "raw_findings": {
+            "file": null
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_04_data_export",
+          "name": "Data export endpoint",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "has_endpoint": false,
+            "machine_readable": true
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_05_data_deletion",
+          "name": "Data deletion endpoint",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "has_endpoint": false,
+            "cascading": false,
+            "audited": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_06_audit_logging",
+          "name": "Audit logging",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "audit_table": false,
+            "immutable": false,
+            "actor_action": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_07_access_controls",
+          "name": "Access controls",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "rbac": false,
+            "abac": false,
+            "per_endpoint": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_08_encryption_at_rest",
+          "name": "Encryption at rest",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "db": false,
+            "files": false,
+            "secrets": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_09_dpa_template",
+          "name": "DPA template",
+          "score": 0.0,
+          "method": "hybrid",
+          "tool_used": "static_file_analysis",
+          "raw_findings": {
+            "file": null
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "comp_10_eu_ai_act",
+          "name": "EU AI Act provenance disclosure",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "disclosure": false,
+            "model_info": false,
+            "mentions_ai": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        }
+      ],
+      "dimension_score": 1.0,
+      "scored_at": "2026-05-19T07:31:25.146553Z",
+      "scoring_duration_seconds": 0.0
+    },
+    "cost_efficiency": {
+      "dimension_id": "cost_efficiency",
+      "dimension_name": "Cost Efficiency",
+      "sub_component_scores": [
+        {
+          "sub_component_id": "cost_04_vendor_lockin",
+          "name": "Vendor lock-in",
+          "score": 10.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "lockin_weight_total": 0,
+            "vendors_detected": []
+          },
+          "rubric_match": "100% OSS or open standards",
+          "notes": null
+        },
+        {
+          "sub_component_id": "cost_05_multicloud_portability",
+          "name": "Multi-cloud portability",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_file_analysis",
+          "raw_findings": {
+            "dockerfile": false,
+            "compose": false,
+            "k8s": false,
+            "helm": false,
+            "cloud_specific_count": 0
+          },
+          "rubric_match": "Platform-specific",
+          "notes": null
+        },
+        {
+          "sub_component_id": "cost_06_oss_ratio",
+          "name": "OSS dependency ratio",
+          "score": 10.0,
+          "method": "automated",
+          "tool_used": "dependency_analyzer_npm",
+          "raw_findings": {
+            "manifest_type": "npm",
+            "oss_hits": 1,
+            "proprietary_hits": 0,
+            "ratio": 1.0
+          },
+          "rubric_match": "100% OSS",
+          "notes": null
+        },
+        {
+          "sub_component_id": "cost_07_egress_optimization",
+          "name": "Egress cost optimization",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "cdn": false,
+            "cache_headers": false,
+            "compression": false,
+            "efficient_protocol": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "cost_08_auto_shutdown",
+          "name": "Auto-shutdown",
+          "score": 4.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "scale_to_zero": false,
+            "serverless_platform": false
+          },
+          "rubric_match": "Manual only",
+          "notes": null
+        },
+        {
+          "sub_component_id": "cost_09_right_sizing",
+          "name": "Resource right-sizing",
+          "score": 4.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "has_resource_limits": false,
+            "oversized_red_flag": false
+          },
+          "rubric_match": "Some oversized",
+          "notes": null
+        },
+        {
+          "sub_component_id": "cost_10_pricing_predictability",
+          "name": "Pricing model predictability",
+          "score": 6.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "flat_pricing": false,
+            "pay_per_use": false,
+            "egress_heavy": false
+          },
+          "rubric_match": "Default unclear",
+          "notes": null
+        },
+        {
+          "sub_component_id": "cost_01_cost_100",
+          "name": "Cost @ 100 users",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "deployment_cost_monitor",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires live deployment + cost monitoring to compute. Returns 0 until deployment harness is operational."
+        },
+        {
+          "sub_component_id": "cost_02_cost_10k",
+          "name": "Cost @ 10k users",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "deployment_cost_monitor",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires live deployment + cost monitoring to compute. Returns 0 until deployment harness is operational."
+        },
+        {
+          "sub_component_id": "cost_03_cost_100k",
+          "name": "Cost @ 100k users",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "deployment_cost_monitor",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires live deployment + cost monitoring to compute. Returns 0 until deployment harness is operational."
+        }
+      ],
+      "dimension_score": 34.0,
+      "scored_at": "2026-05-19T07:31:25.147533Z",
+      "scoring_duration_seconds": 0.0
+    },
+    "scalability": {
+      "dimension_id": "scalability",
+      "dimension_name": "Scalability",
+      "sub_component_scores": [
+        {
+          "sub_component_id": "scale_03_async_processing",
+          "name": "Async processing",
+          "score": 4.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "async_count": 1,
+            "queue_dispatch": false
+          },
+          "rubric_match": "Sync but non-blocking",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_04_background_jobs",
+          "name": "Background job system",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "robust_system": false,
+            "simple_queue": false,
+            "dlq": false,
+            "cron_based": false,
+            "retry_logic": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_05_read_replica",
+          "name": "Read replica support",
+          "score": 2.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "replica_config": false,
+            "db_router": false,
+            "db_abstraction": false
+          },
+          "rubric_match": "Mostly compatible",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_06_stateless",
+          "name": "Stateless architecture",
+          "score": 4.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "stateful_red_flags": 0,
+            "external_session": false
+          },
+          "rubric_match": "Mostly stateful",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_07_container_readiness",
+          "name": "Container readiness",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_file_analysis",
+          "raw_findings": {
+            "has_dockerfile": false,
+            "twelve_factor_count": 1,
+            "has_env_example": false,
+            "has_readme": false
+          },
+          "rubric_match": "Can't containerize",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_08_autoscaling",
+          "name": "Auto-scaling config",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "explicit_autoscale": false,
+            "serverless_platform": false,
+            "documented": false
+          },
+          "rubric_match": "Impossible",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_09_cdn",
+          "name": "CDN configuration",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "cdn": false,
+            "cache_headers": false,
+            "static_dir": false
+          },
+          "rubric_match": "None",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_10_db_indexing",
+          "name": "Database indexing",
+          "score": 10.0,
+          "method": "automated",
+          "tool_used": "static_pattern_analysis",
+          "raw_findings": {
+            "index_definitions": 0,
+            "likely_lookups": 0,
+            "coverage_ratio": 1.0
+          },
+          "rubric_match": "Indexes on all queried columns",
+          "notes": null
+        },
+        {
+          "sub_component_id": "scale_01_load_1k",
+          "name": "Load test 1k concurrent",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "k6_load_test",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires live deployment + k6. Returns 0 until deployment harness is operational."
+        },
+        {
+          "sub_component_id": "scale_02_load_10k",
+          "name": "Load test 10k concurrent",
+          "score": 0.0,
+          "method": "automated",
+          "tool_used": "k6_load_test",
+          "raw_findings": {},
+          "rubric_match": null,
+          "notes": "v0 scaffold: requires live deployment + k6. Returns 0 until deployment harness is operational."
+        }
+      ],
+      "dimension_score": 20.0,
+      "scored_at": "2026-05-19T07:31:25.149536Z",
+      "scoring_duration_seconds": 0.015000000013969839
+    }
+  },
+  "status": "complete",
+  "error": null
+}

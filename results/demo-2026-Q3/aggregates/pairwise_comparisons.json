@@ -1,0 +1,47 @@
+[
+  {
+    "tool_a": "bolt-vibe-coded",
+    "tool_b": "claude-sonnet-4-5",
+    "mean_a": 75.0,
+    "mean_b": 141.0,
+    "mean_diff": -66.0,
+    "t_statistic": -Infinity,
+    "p_value": 0.0,
+    "cohens_d": NaN,
+    "n_a": 3,
+    "n_b": 3,
+    "q_value": 0.0,
+    "bh_rejected_at_5pct": true,
+    "practically_significant": false
+  },
+  {
+    "tool_a": "bolt-vibe-coded",
+    "tool_b": "sigil-deploy",
+    "mean_a": 75.0,
+    "mean_b": 185.0,
+    "mean_diff": -110.0,
+    "t_statistic": -Infinity,
+    "p_value": 0.0,
+    "cohens_d": NaN,
+    "n_a": 3,
+    "n_b": 3,
+    "q_value": 0.0,
+    "bh_rejected_at_5pct": true,
+    "practically_significant": false
+  },
+  {
+    "tool_a": "claude-sonnet-4-5",
+    "tool_b": "sigil-deploy",
+    "mean_a": 141.0,
+    "mean_b": 185.0,
+    "mean_diff": -44.0,
+    "t_statistic": -Infinity,
+    "p_value": 0.0,
+    "cohens_d": NaN,
+    "n_a": 3,
+    "n_b": 3,
+    "q_value": 0.0,
+    "bh_rejected_at_5pct": true,
+    "practically_significant": false
+  }
+]

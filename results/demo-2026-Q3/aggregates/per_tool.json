@@ -1,0 +1,152 @@
+{
+  "bolt-vibe-coded": {
+    "tool_id": "bolt-vibe-coded",
+    "n_runs": 3,
+    "composite_prs": {
+      "mean": 75.0,
+      "median": 75.0,
+      "ci_lower": 75.0,
+      "ci_upper": 75.0,
+      "n": 3
+    },
+    "dimensions": {
+      "compliance": {
+        "mean": 1.0,
+        "median": 1.0,
+        "ci_lower": 1.0,
+        "ci_upper": 1.0,
+        "n": 3
+      },
+      "production_ops": {
+        "mean": 0.0,
+        "median": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "n": 3
+      },
+      "scalability": {
+        "mean": 20.0,
+        "median": 20.0,
+        "ci_lower": 20.0,
+        "ci_upper": 20.0,
+        "n": 3
+      },
+      "cost_efficiency": {
+        "mean": 34.0,
+        "median": 34.0,
+        "ci_lower": 34.0,
+        "ci_upper": 34.0,
+        "n": 3
+      },
+      "security": {
+        "mean": 20.0,
+        "median": 20.0,
+        "ci_lower": 20.0,
+        "ci_upper": 20.0,
+        "n": 3
+      }
+    },
+    "completion_rate": 1.0,
+    "composite_effective_score": 75.0
+  },
+  "claude-sonnet-4-5": {
+    "tool_id": "claude-sonnet-4-5",
+    "n_runs": 3,
+    "composite_prs": {
+      "mean": 141.0,
+      "median": 141.0,
+      "ci_lower": 141.0,
+      "ci_upper": 141.0,
+      "n": 3
+    },
+    "dimensions": {
+      "compliance": {
+        "mean": 17.0,
+        "median": 17.0,
+        "ci_lower": 17.0,
+        "ci_upper": 17.0,
+        "n": 3
+      },
+      "production_ops": {
+        "mean": 18.0,
+        "median": 18.0,
+        "ci_lower": 18.0,
+        "ci_upper": 18.0,
+        "n": 3
+      },
+      "scalability": {
+        "mean": 44.0,
+        "median": 44.0,
+        "ci_lower": 44.0,
+        "ci_upper": 44.0,
+        "n": 3
+      },
+      "cost_efficiency": {
+        "mean": 42.0,
+        "median": 42.0,
+        "ci_lower": 42.0,
+        "ci_upper": 42.0,
+        "n": 3
+      },
+      "security": {
+        "mean": 20.0,
+        "median": 20.0,
+        "ci_lower": 20.0,
+        "ci_upper": 20.0,
+        "n": 3
+      }
+    },
+    "completion_rate": 1.0,
+    "composite_effective_score": 141.0
+  },
+  "sigil-deploy": {
+    "tool_id": "sigil-deploy",
+    "n_runs": 3,
+    "composite_prs": {
+      "mean": 185.0,
+      "median": 185.0,
+      "ci_lower": 185.0,
+      "ci_upper": 185.0,
+      "n": 3
+    },
+    "dimensions": {
+      "compliance": {
+        "mean": 25.0,
+        "median": 25.0,
+        "ci_lower": 25.0,
+        "ci_upper": 25.0,
+        "n": 3
+      },
+      "production_ops": {
+        "mean": 26.0,
+        "median": 26.0,
+        "ci_lower": 26.0,
+        "ci_upper": 26.0,
+        "n": 3
+      },
+      "scalability": {
+        "mean": 60.0,
+        "median": 60.0,
+        "ci_lower": 60.0,
+        "ci_upper": 60.0,
+        "n": 3
+      },
+      "cost_efficiency": {
+        "mean": 54.0,
+        "median": 54.0,
+        "ci_lower": 54.0,
+        "ci_upper": 54.0,
+        "n": 3
+      },
+      "security": {
+        "mean": 20.0,
+        "median": 20.0,
+        "ci_lower": 20.0,
+        "ci_upper": 20.0,
+        "n": 3
+      }
+    },
+    "completion_rate": 1.0,
+    "composite_effective_score": 185.0
+  }
+}

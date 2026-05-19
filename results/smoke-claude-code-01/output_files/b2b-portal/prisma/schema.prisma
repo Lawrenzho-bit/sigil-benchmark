@@ -1,0 +1,105 @@
+// Postgres schema for the B2B portal.
+//
+// Multi-tenant by Organization. A User belongs to exactly one Organization
+// via Membership, which carries the role. (Single-org-per-user keeps the
+// vertical slice honest; multi-org membership is a known extension point.)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id              String         @id @default(cuid())
+  name            String
+  // Stripe linkage. Nullable because billing is a deferred integration —
+  // an org is fully usable before billing is wired. See src/lib/stripe.ts.
+  stripeCustomerId String?       @unique
+  plan            Plan           @default(STARTER)
+  createdAt       DateTime       @default(now())
+  memberships     Membership[]
+  invites         Invite[]
+  auditLogs       AuditLog[]
+}
+
+enum Plan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  VIEWER
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  // Null when the account is SSO-only (no local password). Email/password
+  // and SAML can both resolve to the same User by email.
+  passwordHash String?
+  name         String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  membership   Membership?
+  sessions     Session[]
+}
+
+model Membership {
+  id     String       @id @default(cuid())
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String       @unique
+  org    Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId  String
+  role   Role
+
+  @@index([orgId])
+}
+
+model Session {
+  // The session id is the cookie value. It is a high-entropy random token,
+  // never derived from user data. Expired sessions are rejected at lookup.
+  id        String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Invite {
+  id        String       @id @default(cuid())
+  email     String
+  role      Role
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId     String
+  token     String       @unique
+  expiresAt DateTime
+  acceptedAt DateTime?
+  createdAt DateTime      @default(now())
+
+  @@unique([orgId, email])
+}
+
+model AuditLog {
+  id        String       @id @default(cuid())
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId     String
+  // Who did it. String (not FK) so the record survives actor deletion —
+  // an audit log you can erase by deleting the user is not an audit log.
+  actorId   String
+  actorEmail String
+  action    String
+  // Free-form context (target user, old/new role, etc.). JSON for query-ability.
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  @@index([orgId, createdAt])
+}

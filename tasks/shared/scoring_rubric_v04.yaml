@@ -1,0 +1,367 @@
+# Sigil Benchmark - PRS v0.4 Scoring Rubric (Machine-Readable)
+# This is the canonical scoring specification used by the harness.
+# Generated from project_prs_methodology_v04.md
+
+methodology_version: "0.4.0"
+last_updated: "2026-05-19"
+total_sub_components: 50  # 5 dimensions x 10 sub-components
+
+dimensions:
+  security:
+    weight_default: 0.25
+    weight_range: [0.15, 0.35]  # adjustable per task
+    sub_components:
+      - id: sec_01_static_analysis
+        name: Static analysis findings
+        scoring_method: automated
+        tool: semgrep+snyk+codeql
+        rubric:
+          10: "0 critical, 0 high findings"
+          8:  "0 critical, 1-3 high"
+          6:  "0 critical, 4-10 high OR 1 critical"
+          4:  "1-2 critical OR 11+ high"
+          2:  "3-5 critical"
+          0:  "6+ critical"
+
+      - id: sec_02_dependency_cves
+        name: Dependency CVE count
+        scoring_method: automated
+        tool: npm_audit|pip_audit|cargo_audit
+        rubric:
+          10: "0 high/critical CVEs"
+          8:  "0 critical, 1-2 high"
+          6:  "0 critical, 3-5 high"
+          4:  "1-2 critical OR 6-15 high"
+          2:  "3-5 critical"
+          0:  "6+ critical"
+
+      - id: sec_03_auth_correctness
+        name: Authentication correctness (OWASP ASVS L1)
+        scoring_method: automated
+        tool: owasp_asvs_l1_suite
+        rubric:
+          10: "Pass all V2+V3 controls"
+          8:  "1 failure"
+          6:  "2-3 failures"
+          4:  "4-6 failures"
+          2:  "7-10 failures"
+          0:  "11+ failures"
+
+      - id: sec_04_input_validation
+        name: Input validation coverage
+        scoring_method: automated
+        tool: harness_probe
+        rubric:
+          10: "100% of user-input endpoints validated"
+          8:  "80-99%"
+          6:  "60-79%"
+          4:  "40-59%"
+          2:  "20-39%"
+          0:  "<20%"
+
+      - id: sec_05_sqli_resistance
+        name: SQL injection resistance
+        scoring_method: automated
+        tool: owasp_zap+sqlmap
+        rubric:
+          10: "All probes blocked"
+          8:  "1 successful"
+          6:  "2-3"
+          4:  "4-6"
+          2:  "7-10"
+          0:  "11+"
+
+      - id: sec_06_xss_prevention
+        name: XSS prevention
+        scoring_method: automated
+        tool: owasp_zap
+        rubric:
+          10: "All probes blocked"
+          8:  "1"
+          6:  "2-3"
+          4:  "4-6"
+          2:  "7-10"
+          0:  "11+"
+
+      - id: sec_07_csrf_protection
+        name: CSRF protection
+        scoring_method: automated
+        tool: harness_probe
+        rubric:
+          10: "Tokens on all state-changing endpoints"
+          8:  "90%+ coverage"
+          6:  "70-89%"
+          4:  "50-69%"
+          2:  "30-49%"
+          0:  "<30%"
+
+      - id: sec_08_secret_management
+        name: Secret management
+        scoring_method: automated
+        tool: gitleaks+trufflehog
+        rubric:
+          10: "All secrets in env/secret-manager"
+          8:  "1-2 hardcoded test secrets"
+          6:  "3-5 hardcoded"
+          4:  "6-10"
+          2:  "11-20"
+          0:  "20+"
+
+      - id: sec_09_tls_config
+        name: TLS/HTTPS configuration
+        scoring_method: automated
+        tool: testssl_sh
+        rubric:
+          10: "HTTPS-only + HSTS + secure cookies + modern TLS"
+          8:  "HTTPS + HSTS"
+          6:  "HTTPS only"
+          4:  "HTTP allowed but redirected"
+          2:  "HTTP supported"
+          0:  "HTTP only"
+
+      - id: sec_10_rate_limiting
+        name: Rate limiting
+        scoring_method: automated
+        tool: harness_probe
+        rubric:
+          10: "Auth + API + per-tenant limits"
+          8:  "Auth + API global limits"
+          6:  "Auth only"
+          4:  "Some endpoints"
+          2:  "Configured but not active"
+          0:  "None"
+
+  production_ops:
+    weight_default: 0.25
+    weight_range: [0.15, 0.35]
+    sub_components:
+      - id: ops_01_error_handling
+        name: Error handling (fuzz testing)
+        scoring_method: automated
+        tool: harness_fuzzer
+        rubric:
+          10: "No crashes under fuzz, all errors return structured responses"
+          8:  "<1% crash rate"
+          6:  "1-3%"
+          4:  "3-10%"
+          2:  "10-25%"
+          0:  ">25%"
+
+      - id: ops_02_observability
+        name: Observability
+        scoring_method: hybrid  # automated detection + manual review
+        tool: code_inspection
+        rubric:
+          10: "Structured logs + metrics + distributed traces"
+          8:  "Logs + metrics"
+          6:  "Structured logs only"
+          4:  "Unstructured logs"
+          2:  "Console only"
+          0:  "None"
+
+      - id: ops_03_health_checks
+        name: Health checks
+        scoring_method: automated
+        tool: harness_probe
+        rubric:
+          10: "/health + dependency checks + readiness/liveness"
+          8:  "/health with deps"
+          6:  "/health basic"
+          4:  "200-OK endpoint only"
+          2:  "Implicit only"
+          0:  "None"
+
+      - id: ops_04_backup_strategy
+        name: Backup strategy
+        scoring_method: manual_review
+        rubric:
+          10: "Automated daily + tested restore"
+          8:  "Automated daily, untested"
+          6:  "Manual backup process documented"
+          4:  "Backup possible but not configured"
+          2:  "Mentioned in code"
+          0:  "None"
+
+      - id: ops_05_db_pooling
+        name: DB connection pooling
+        scoring_method: hybrid
+        rubric:
+          10: "Pool sized + max connections + timeout"
+          8:  "Pool configured"
+          6:  "Default pool used"
+          4:  "Connection per request"
+          2:  "No pooling code"
+          0:  "Single connection"
+
+      - id: ops_06_n_plus_one
+        name: N+1 query detection
+        scoring_method: automated
+        tool: query_analyzer
+        rubric:
+          10: "0 N+1 detected on standard ops"
+          8:  "1"
+          6:  "2-3"
+          4:  "4-6"
+          2:  "7-10"
+          0:  "11+"
+
+      - id: ops_07_cache_strategy
+        name: Cache strategy
+        scoring_method: hybrid
+        rubric:
+          10: "Redis/equivalent for hot data + invalidation strategy"
+          8:  "Cache with TTL"
+          6:  "Cache layer present but minimal"
+          4:  "HTTP caching only"
+          2:  "No-cache headers"
+          0:  "None"
+
+      - id: ops_08_graceful_degradation
+        name: Graceful degradation
+        scoring_method: automated
+        tool: chaos_test
+        rubric:
+          10: "Handles DB/API/cache failures with fallbacks"
+          8:  "Handles 2 of 3"
+          6:  "Handles 1 of 3"
+          4:  "Tries but crashes"
+          2:  "No fallbacks"
+          0:  "Full failure"
+
+      - id: ops_09_deployment_automation
+        name: Deployment automation
+        scoring_method: hybrid
+        rubric:
+          10: "CI + CD + rollback configured"
+          8:  "CI + CD"
+          6:  "CI only"
+          4:  "Build scripts only"
+          2:  "Documented manual process"
+          0:  "Nothing"
+
+      - id: ops_10_time_correctness  # NEW IN v0.2
+        name: Time correctness
+        scoring_method: automated
+        tool: harness_time_probe
+        rubric:
+          10: "All time stored UTC, displayed in user TZ, DST-aware, locale-aware"
+          8:  "UTC storage + TZ display"
+          6:  "UTC storage only"
+          4:  "Server-local time used"
+          2:  "Mixed TZ handling"
+          0:  "TZ ignored"
+
+  scalability:
+    weight_default: 0.20
+    weight_range: [0.05, 0.25]
+    sub_components:
+      - id: scale_01_load_1k
+        name: Load test 1k concurrent
+        scoring_method: automated
+        tool: k6
+        rubric:
+          10: "p95 <500ms, 0 errors"
+          8:  "p95 <1s, <0.1% errors"
+          6:  "p95 <2s, <1% errors"
+          4:  "p95 <5s, <5% errors"
+          2:  "p95 <10s, <10% errors"
+          0:  "Fails"
+
+      - id: scale_02_load_10k
+        name: Load test 10k concurrent
+        scoring_method: automated
+        tool: k6
+        rubric:
+          10: "p95 <2s, 0 errors"
+          8:  "p95 <5s, <0.5% errors"
+          6:  "p95 <10s, <2% errors"
+          4:  "p95 <30s, <10% errors"
+          2:  "Severely degraded"
+          0:  "Fails"
+
+      # ... (8 more sub-components, abbreviated for v0)
+      # See methodology document for complete specification
+
+  compliance:
+    weight_default: 0.20
+    weight_range: [0.15, 0.30]
+    sub_components:
+      # Each compliance sub-component scored on 3-tier (v0.4):
+      # Presence (0-3) + Functionality (0-4) + Defaults (0-3) = total 0-10
+      - id: comp_01_cookie_consent
+        name: GDPR cookie consent
+        scoring_method: hybrid
+        scoring_tiers:
+          presence:
+            0: "No banner"
+            1: "Banner present, no preferences UI"
+            2: "Banner + basic preferences"
+            3: "Banner + granular preferences + clear UX"
+          functionality:
+            0: "Banner cosmetic only, tracking happens regardless"
+            1: "Banner records consent but tracking happens regardless"
+            2: "Banner blocks some tracking after rejection"
+            3: "Banner blocks all third-party tracking after rejection"
+            4: "All above plus verifiable network log shows tracking stopped"
+          defaults:
+            0: "Tracking on by default, opt-out"
+            1: "Mixed defaults"
+            2: "Opt-in for non-essential cookies"
+            3: "Opt-in plus easy revocation plus clear UX"
+
+      # ... (9 more sub-components)
+
+  cost_efficiency:
+    weight_default: 0.10
+    weight_range: [0.05, 0.15]
+    sub_components:
+      # ... (10 sub-components, abbreviated)
+
+# Universal cross-cutting addition (v0.4 — beyond the 50 sub-components)
+adversarial_robustness:
+  weight: "embedded_in_security"
+  sub_component_id: sec_11_adversarial
+  probes:
+    - typo_inputs
+    - unicode_edge_cases
+    - boundary_values
+    - sqli_payloads_in_data
+    - xss_payloads_in_data
+    - malformed_json
+    - concurrent_request_races
+  held_out_percent: 0.50  # Half of probes never published
+
+# Statistical methodology (v0.4)
+statistical:
+  runs_per_condition: 50  # Increased from N=10 to N=50 for power
+  power: 0.80
+  alpha: 0.05
+  mdes_target: 4.0  # Minimum detectable effect (PRS points)
+  multiple_comparisons: benjamini_hochberg
+  ci_method: bootstrap_percentile
+  bootstrap_resamples: 10000
+  aggregation: irt_gpcm  # Generalized Partial Credit Model + summed score (both reported)
+
+# Modes
+modes:
+  prs_autonomous:
+    description: "Zero human modification to output"
+    weight: 1.0
+  prs_reviewed:
+    description: "One round standardized human review (max 5 mods, 30 min cap, no AI assist)"
+    reviewer_tier: "mid_level_engineer_5_to_8_years"
+    max_modifications: 5
+    time_cap_minutes: 30
+
+# Per-task weight templates (v0.2)
+task_weight_templates:
+  task_01_b2b_portal:    { security: 0.25, ops: 0.25, scale: 0.20, comp: 0.20, cost: 0.10 }
+  task_02_admin_tool:    { security: 0.30, ops: 0.25, scale: 0.10, comp: 0.25, cost: 0.10 }
+  task_03_marketplace:   { security: 0.25, ops: 0.20, scale: 0.20, comp: 0.25, cost: 0.10 }
+  task_04_support:       { security: 0.20, ops: 0.30, scale: 0.15, comp: 0.25, cost: 0.10 }
+  task_05_analytics:     { security: 0.20, ops: 0.25, scale: 0.25, comp: 0.20, cost: 0.10 }
+  task_06_pm_app:        { security: 0.20, ops: 0.30, scale: 0.20, comp: 0.20, cost: 0.10 }
+  task_07_subscription:  { security: 0.25, ops: 0.25, scale: 0.15, comp: 0.25, cost: 0.10 }
+  task_08_documents:     { security: 0.25, ops: 0.25, scale: 0.20, comp: 0.20, cost: 0.10 }
+  task_09_booking:       { security: 0.20, ops: 0.30, scale: 0.20, comp: 0.20, cost: 0.10 }
+  task_10_api:           { security: 0.25, ops: 0.25, scale: 0.25, comp: 0.15, cost: 0.10 }

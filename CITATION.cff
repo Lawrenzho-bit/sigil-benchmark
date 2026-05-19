@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: "The Sigil Benchmark: Production Readiness Score (PRS)"
+abstract: >-
+  An open methodology and reference implementation for measuring the
+  production readiness of AI-generated software. PRS evaluates code outputs
+  from AI coding tools across five dimensions — Security, Production
+  Readiness Ops, Scalability, Compliance, and Cost Efficiency — using static
+  analysis, dynamic probing, and bootstrapped statistical methods. PRS fills
+  the gap left by capability-focused benchmarks (HELM, SWE-bench, HumanEval)
+  by measuring whether AI-generated output is actually safe to ship.
+message: >-
+  If you use the Sigil Benchmark in research or evaluation, please cite as
+  below.
+type: software
+authors:
+  - name: "Sigil Foundation Contributors"
+    website: "https://github.com/Lawrenzho-bit/sigil-benchmark"
+version: "0.4.0"
+date-released: "2026-05-19"
+license: Apache-2.0
+url: "https://github.com/Lawrenzho-bit/sigil-benchmark"
+repository-code: "https://github.com/Lawrenzho-bit/sigil-benchmark"
+keywords:
+  - ai-evaluation
+  - benchmark
+  - code-generation
+  - production-readiness
+  - software-quality
+  - llm-evaluation
+  - generative-ai
+  - sigil
+identifiers:
+  - type: url
+    value: "https://github.com/Lawrenzho-bit/sigil-benchmark"
+    description: "Sigil Benchmark v0.4 — open methodology and reference implementation"

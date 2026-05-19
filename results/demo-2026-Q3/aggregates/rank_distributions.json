@@ -1,0 +1,23 @@
+{
+  "bolt-vibe-coded": {
+    "mean_rank": 3.0,
+    "p10_rank": 3.0,
+    "p90_rank": 3.0,
+    "modal_rank": 3.0,
+    "rsc": 0.0
+  },
+  "claude-sonnet-4-5": {
+    "mean_rank": 2.0,
+    "p10_rank": 2.0,
+    "p90_rank": 2.0,
+    "modal_rank": 2.0,
+    "rsc": 0.0
+  },
+  "sigil-deploy": {
+    "mean_rank": 1.0,
+    "p10_rank": 1.0,
+    "p90_rank": 1.0,
+    "modal_rank": 1.0,
+    "rsc": 0.0
+  }
+}

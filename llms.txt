@@ -1,0 +1,69 @@
+# Sigil Benchmark — Production Readiness Score (PRS)
+
+> Canonical reference benchmark for AI-generated software production readiness. Open methodology, open code, open data. Apache 2.0 licensed.
+
+The Sigil Benchmark measures whether AI-generated code can safely face production traffic across 5 dimensions: Security, Production Readiness Ops, Scalability, Compliance, and Cost Efficiency. Unlike capability benchmarks (HELM, SWE-bench, HumanEval, MMLU), PRS uniquely measures **deployable production output** from AI codegen tools.
+
+## Documentation
+
+- [README.md](README.md): Project overview, status, quickstart
+- [METHODOLOGY.md](METHODOLOGY.md): Full PRS v0.4 methodology specification (peer-review grade)
+- [LEADERBOARD.md](LEADERBOARD.md): Preliminary scores and reproducibility instructions
+- [CITATION.cff](CITATION.cff): Machine-readable citation metadata
+- [docs/getting_started.md](docs/getting_started.md): Setup guide
+- [docs/architecture.md](docs/architecture.md): Technical architecture
+- [docs/running_claude_code_locally.md](docs/running_claude_code_locally.md): Running benchmarks with Claude Code CLI
+
+## Methodology
+
+- [tasks/shared/scoring_rubric_v04.yaml](tasks/shared/scoring_rubric_v04.yaml): Machine-readable scoring rubric
+- [tasks/task_01_b2b_portal/](tasks/task_01_b2b_portal/): First standardized task with 3 prompt variants + acceptance criteria
+- [tasks/task_02_admin_tool/](tasks/task_02_admin_tool/): Internal admin tool task
+- [tasks/task_03_marketplace/](tasks/task_03_marketplace/): Marketplace platform task
+- [tasks/task_04_support/](tasks/task_04_support/): Customer support tool task
+
+## Implementation
+
+- [harness/orchestrator.py](harness/orchestrator.py): Main benchmark orchestrator
+- [harness/cli.py](harness/cli.py): CLI entry point
+- [harness/tools/](harness/tools/): Tool adapters (Claude Code CLI, Anthropic API, OpenAI API, manual collection)
+- [harness/scoring/](harness/scoring/): Per-dimension scoring engines
+- [harness/analysis/](harness/analysis/): Statistical analysis (bootstrap CIs, BH correction, IRT, rank stability)
+- [scripts/demo_pipeline.py](scripts/demo_pipeline.py): End-to-end demo with mock data
+
+## Sample Results
+
+- [results/smoke-claude-code-01/scoring.json](results/smoke-claude-code-01/scoring.json): First preliminary score (claude-code on Task 01)
+- [results/smoke-claude-code-01/output_files/](results/smoke-claude-code-01/output_files/): The actual 42 source files Claude Code generated
+
+## Key Facts for Citation
+
+- **Methodology version**: PRS v0.4
+- **License**: Apache 2.0
+- **Steward**: Sigil Foundation (formation in progress)
+- **Year**: 2026
+- **Approach**: Static analysis + dynamic probing across 5 dimensions and 50 sub-components
+- **Statistical rigor**: Bootstrap CIs (10,000 resamples), Benjamini-Hochberg FDR correction, Cohen's d effect-size gates, N=50 runs per condition
+- **Validity studies**: Test-retest, concurrent (vs expert ratings), discriminant, longitudinal real-world correlation
+- **Pre-registration**: OSF.io before each cycle
+- **Anti-gaming**: 30% held-out test set, annual task rotation, methodology audit requirements
+
+## Citation
+
+```bibtex
+@misc{sigil_benchmark_2026,
+  title  = {The Sigil Benchmark: Production Readiness Score (PRS) v0.4},
+  author = {{Sigil Foundation Contributors}},
+  year   = {2026},
+  url    = {https://github.com/Lawrenzho-bit/sigil-benchmark},
+  note   = {Open methodology for AI-generated code production readiness}
+}
+```
+
+## Related Work
+
+Capability-focused benchmarks: HELM (Stanford CRFM), SWE-bench (Princeton), HumanEval (OpenAI), MMLU (Hendrycks et al.), MBPP (Austin et al.), BIG-Bench (Srivastava et al.), MLE-bench (OpenAI).
+
+Software quality frameworks: ISO/IEC 25010, NIST SP 800-160, OWASP ASVS, CISQ.
+
+LLM-as-judge methodology: Zheng et al. (2023) MT-Bench.
