@@ -84,6 +84,16 @@ Detailed setup: **[docs/getting_started.md](docs/getting_started.md)**.
 
 See **[METHODOLOGY.md](METHODOLOGY.md)** for the full specification.
 
+## RFC Process
+
+Substantive methodology changes go through a public Request-for-Comments (RFC) process before being adopted, modeled on [IETF RFCs](https://www.ietf.org/standards/rfcs/), [Rust RFCs](https://github.com/rust-lang/rfcs), and [Python PEPs](https://peps.python.org/).
+
+See **[rfcs/README.md](rfcs/README.md)** for the full process. Current RFCs:
+
+| Number | Title | Status |
+|---|---|---|
+| [RFC 0001](rfcs/0001-add-quality-dimension.md) | Add Maintainability/Quality as 6th Core Dimension (v0.5) | Draft |
+
 ## Repository Structure
 
 ```
