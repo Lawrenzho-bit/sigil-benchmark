@@ -53,6 +53,17 @@ The 5-factor structure is testable. Confirmatory factor analysis (CFA) will be c
 
 If empirical evidence rejects the 5-factor structure, the methodology will be revised.
 
+### 2.4 Prior Work on ISO/IEC 25010 for AI-Generated Code
+
+[Sun et al. (2025)](https://arxiv.org/html/2511.10271v2), at Linköping University, were the first to systematically apply ISO/IEC 25010 to LLM-generated code quality. Their mixed-methods empirical study covers three non-functional quality characteristics: Security, Maintainability, and Performance Efficiency. They report a "misalignment between academic focus, industry priorities, and observed model behavior" — practitioners emphasize maintainability, but generated code often introduces technical debt despite functional correctness.
+
+PRS extends Sun et al.'s framing in three ways:
+- From 3 dimensions to 5 (adds Compliance, Cost Efficiency; expands Production Ops beyond performance)
+- From empirical study to operationalized scoring rubric (50 sub-components × 0-10 each)
+- From snippet-level to system-level (load tests, integration mocks, deployment harness)
+
+PRS adopts Sun et al.'s ISO/IEC 25010 anchor and acknowledges this prior work as the direct conceptual predecessor.
+
 ---
 
 ## 3. Scoring Overview
@@ -331,6 +342,74 @@ If PRS doesn't correlate with real-world outcomes, methodology is revised.
 
 ---
 
+## 16.5. Related Work
+
+PRS exists within a crowded landscape of AI codegen evaluation. This section maps where PRS overlaps with, extends, or differs from existing benchmarks and frameworks.
+
+### 16.5.1 Dimensions Covered Across Benchmarks
+
+| Benchmark / Framework | Functional Correctness | Security | Production Ops | Scalability | Compliance | Cost Efficiency | Code Quality |
+|---|---|---|---|---|---|---|---|
+| [HumanEval](https://github.com/openai/human-eval) (Chen et al., 2021) | ✓ | — | — | — | — | — | — |
+| [MBPP](https://github.com/google-research/google-research/tree/master/mbpp) (Austin et al., 2021) | ✓ | — | — | — | — | — | — |
+| [SWE-bench / Verified / Pro](https://www.swebench.com/) (Jimenez et al., 2023+) | ✓ | — | — | — | — | — | — |
+| [ProdCodeBench](https://arxiv.org/abs/2604.01527) (Meta, 2026) | ✓ | — | — | — | — | — | — |
+| [HELM](https://crfm.stanford.edu/helm/) (Liang et al., 2023) | ✓ | partial | — | — | — | — | — |
+| [COMPASS](https://arxiv.org/pdf/2508.13757) (2025) | ✓ | — | — | partial | — | — | ✓ |
+| [RACE](https://arxiv.org/html/2511.10271v2) | ✓ | — | — | partial | — | — | ✓ |
+| [Sun et al.](https://arxiv.org/html/2511.10271v2) (Linköping, 2025) | ✓ | ✓ | partial | partial | — | — | ✓ |
+| [Dai et al.](https://arxiv.org/abs/2503.15554) (ICSE 2026) | ✓ | ✓ | — | — | — | — | — |
+| [GDPR-Bench-Android](https://arxiv.org/pdf/2511.00619) (2025) | — | — | — | — | ✓ (GDPR only, Android only) | — | — |
+| CARE Index (CloudBees, 2026) | — | — | partial | — | — | ✓ | — |
+| **PRS v0.4 (this work)** | ✓ (via tests) | ✓ | ✓ | ✓ | ✓ | ✓ | partial |
+
+PRS is the first openly-published benchmark covering all five production-readiness dimensions in a single integrated rubric.
+
+### 16.5.2 Methodological Rigor Comparison
+
+| Property | HumanEval | SWE-bench | ProdCodeBench | Sun et al. | PRS v0.4 |
+|---|---|---|---|---|---|
+| Multi-dimensional scoring | — | — | — | ✓ | ✓ |
+| Statistical rigor (variance, CIs) | — | — | partial | — | ✓ |
+| Multiple-comparison correction | — | — | — | — | ✓ |
+| Multi-mode scoring (autonomous + reviewed) | — | — | — | — | ✓ |
+| Safety refusal track | — | — | — | — | ✓ |
+| Anti-gaming defenses (held-out set, rotation) | — | partial | — | — | ✓ |
+| Tool configuration disclosure | — | — | partial | partial | ✓ |
+| AI-involvement spectrum classification | — | — | — | — | ✓ |
+| Pre-registration protocol | — | — | — | — | ✓ |
+| External validity (longitudinal study) | — | — | — | — | planned |
+| Open methodology + code + data | ✓ | ✓ | partial | partial | ✓ |
+| ISO/IEC 25010 grounding | — | — | — | ✓ | ✓ |
+
+### 16.5.3 Closest Adjacent Work
+
+**Functional correctness benchmarks** (HumanEval, MBPP, SWE-bench, ProdCodeBench) measure whether AI-generated code *works* — necessary but not sufficient for production. PRS could ride on top of any of these; ProdCodeBench's production-derived prompts in particular complement PRS's multi-dimensional scoring.
+
+**Multi-dimensional code-quality benchmarks** (COMPASS, RACE) score code along multiple axes but at the snippet level, not system level. They cover correctness + efficiency + readability/maintainability. PRS instead targets system-level deployability: not "is this function efficient?" but "will this deployed app survive production traffic?"
+
+**Security-focused work** ([Dai et al., ICSE 2026](https://arxiv.org/abs/2503.15554); [Hidden Risks of LLM-Generated Web, 2025](https://arxiv.org/pdf/2504.20612); [SecuCoGen, 2023](https://arxiv.org/pdf/2310.16263)) deeply addresses one of PRS's 5 dimensions. Their critiques (don't evaluate security separately from functionality; don't rely on CodeQL alone) are already incorporated into PRS Security dimension design (§4.1).
+
+**Compliance benchmarking** ([GDPR-Bench-Android, 2025](https://arxiv.org/pdf/2511.00619)) is the first serious compliance-as-benchmark precedent. PRS Compliance dimension uses a 3-tier scoring approach (Presence + Functionality + Defaults) that differs from GDPR-Bench-Android's violation-localization approach. Both are valid; they target different evaluation needs.
+
+**Industry context**: [CloudBees' State of Code Abundance 2026](https://www.globenewswire.com/news-release/2026/05/19/3297549/0/en/81-of-Enterprise-Technology-Leaders-Report-Production-Failures-from-AI-Generated-Code-New-Research-Shows.html) reports 81% of enterprise technology leaders observed production failures from AI-generated code. Their CARE Index targets enterprise governance and cost attribution, complementary to PRS's code-quality focus.
+
+**Differently-scoped readiness work**: [LLM Readiness Harness (Maiorano, 2026)](https://arxiv.org/pdf/2603.27355) evaluates LLM applications themselves (groundedness, retrieval hit rate, latency), not the code those LLMs generate. Different problem space, partially overlapping vocabulary.
+
+### 16.5.4 What PRS Genuinely Contributes
+
+Synthesizing the above, PRS's defensible novelty is in **integration and operationalization**, not in any single dimension:
+
+1. First openly-published benchmark covering Security + Production Ops + Scalability + Compliance + Cost in a unified rubric
+2. 3-tier functional compliance scoring (Presence + Functionality + Defaults) as an operationalization of compliance-as-benchmark
+3. AI-Involvement Spectrum (6 positions) as a formal construct distinction
+4. PRS-Autonomous + PRS-Reviewed dual modes for tool-fairness across agentic/assistive paradigms
+5. Per-task weight templates (admin tool ≠ marketplace)
+6. Safety Refusal Track formally separated from Completion Rate
+7. Statistical rigor stack (bootstrap CIs + BH correction + IRT + Cohen's d gates) applied to a production-readiness benchmark
+
+PRS does not claim novelty for: ISO/IEC 25010 framing (Sun et al.), joint security + functionality evaluation (Dai et al.), production-relevance motivation (ProdCodeBench), living-benchmark framework (HELM), or established statistical methods (Benjamini-Hochberg, bootstrap, IRT).
+
 ## 17. Reproducibility
 
 - Methodology specification: public (this document)
@@ -401,15 +480,35 @@ Roadmap:
 
 PRS v0.4 incorporates feedback patterns derived from rigorous AI evaluation literature:
 
+### Direct Conceptual Predecessors (AI-Generated Code Quality)
+
+- [Sun et al. (2025)](https://arxiv.org/html/2511.10271v2) — first to apply ISO/IEC 25010 to LLM-generated code quality (Security, Maintainability, Performance Efficiency)
+- [ProdCodeBench (Jha et al., Meta 2026)](https://arxiv.org/abs/2604.01527) — production-derived prompts approach
+- [Dai et al. (ICSE 2026)](https://arxiv.org/abs/2503.15554) — joint security + functionality evaluation critique
+- [GDPR-Bench-Android (2025)](https://arxiv.org/pdf/2511.00619) — first benchmark for automated compliance detection
+- [CloudBees State of Code Abundance 2026](https://www.globenewswire.com/news-release/2026/05/19/3297549/0/en/81-of-Enterprise-Technology-Leaders-Report-Production-Failures-from-AI-Generated-Code-New-Research-Shows.html) — empirical motivation: 81% of enterprise leaders observed production failures from AI-generated code
+
+### Evaluation Methodology
+
+- HELM (Liang et al., 2023) — holistic evaluation framework
+- HumanEval (Chen et al., 2021) — functional correctness benchmark
+- SWE-bench / Verified / Pro (Jimenez et al., 2023+) — real-issue evaluation
+- COMPASS / RACE — multi-dimensional code quality
+- Foundation model evaluation (Bommasani et al., 2023)
+- LLM-as-judge biases (Zheng et al., 2023) — MT-Bench
+
+### Statistical Foundations
+
 - Statistical power: Card et al. (2020) "With Little Power Comes Great Responsibility"
 - Multiple comparisons: Benjamini & Hochberg (1995)
 - Measurement theory: Stevens (1946); Michell (1999, 2000); Embretson & Reise (2000) on IRT
 - Construct validity: Cronbach & Meehl (1955)
 - Researcher degrees of freedom: Simmons, Nelson, Simonsohn (2011)
-- LLM-as-judge biases: Zheng et al. (2023) "Judging LLM-as-a-Judge with MT-Bench"
-- Foundation model evaluation: Bommasani et al. (2023)
-- Holistic evaluation: HELM (Liang et al., 2023)
-- Software quality: ISO/IEC 25010; NIST SP 800-160
-- Security verification: OWASP ASVS
+
+### Software Quality & Security Standards
+
+- ISO/IEC 25010 — software quality model
+- NIST SP 800-160 — systems security engineering
+- OWASP ASVS — application security verification
 
 PRS is built on the shoulders of prior work. The methodology is intended to be community-owned, independently governed, and continually refined through public RFC process.

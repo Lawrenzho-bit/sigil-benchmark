@@ -30,9 +30,14 @@ Full methodology: **[METHODOLOGY.md](METHODOLOGY.md)** (v0.4, designed for top-v
 
 ## Why It Exists
 
-AI codegen tools are rapidly increasing in capability but vary enormously in production output quality. There is currently **no widely-adopted benchmark** for whether AI-generated code is actually safe to ship. Procurement teams, regulators, journalists, and developers need a transparent, methodologically rigorous reference.
+> **81% of enterprise technology leaders report production failures from AI-generated code.**
+> — [CloudBees State of Code Abundance 2026](https://www.globenewswire.com/news-release/2026/05/19/3297549/0/en/81-of-Enterprise-Technology-Leaders-Report-Production-Failures-from-AI-Generated-Code-New-Research-Shows.html), surveying 200+ enterprise tech leaders
 
-The Sigil Benchmark aims to be one open contribution to that gap — open methodology, open code, open data. We hope it can eventually be governed by an independent body; see [Governance](#governance).
+AI codegen tools are rapidly increasing in capability but vary enormously in *deployable* output quality. Existing benchmarks measure capability (HumanEval, MMLU), issue resolution (SWE-bench), or production-derived prompts (ProdCodeBench) — all valuable, all pass/fail. None measure whether the resulting code is actually **safe to ship**: secure, compliant, observable, scalable, cost-efficient.
+
+The Sigil Benchmark aims to fill that gap — open methodology, open code, open data. PRS extends prior work ([Sun et al. 2025](https://arxiv.org/html/2511.10271v2) on ISO/IEC 25010 for LLM code; [GDPR-Bench-Android 2025](https://arxiv.org/pdf/2511.00619) on automated compliance) into the first 5-dimensional rubric covering Security + Production Ops + Scalability + Compliance + Cost in a single integrated score. See [METHODOLOGY §16.5](METHODOLOGY.md#165-related-work) for the full prior-art comparison.
+
+We hope it can eventually be governed by an independent body; see [Governance](#governance).
 
 ## Status
 

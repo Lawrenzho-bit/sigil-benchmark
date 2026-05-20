@@ -62,8 +62,28 @@ The Sigil Benchmark measures whether AI-generated code can safely face productio
 
 ## Related Work
 
-Capability-focused benchmarks: HELM (Stanford CRFM), SWE-bench (Princeton), HumanEval (OpenAI), MMLU (Hendrycks et al.), MBPP (Austin et al.), BIG-Bench (Srivastava et al.), MLE-bench (OpenAI).
+### Direct Conceptual Predecessors
+- Sun et al. (2025, Linköping): "Quality Assurance of LLM-generated Code: Addressing Non-Functional Quality Characteristics" — arXiv:2511.10271. First to apply ISO/IEC 25010 to LLM-generated code. PRS extends from 3 to 5 dimensions.
+- ProdCodeBench (Meta, 2026, Jha et al.): "Production-Derived Benchmark for Evaluating AI Coding Agents" — arXiv:2604.01527. Production-derived prompts, functional correctness only (53.2-72.2% solve rates across 4 models).
+- Dai et al. (ICSE 2026): "Rethinking the Evaluation of Secure Code Generation" — arXiv:2503.15554. Critiques fragmented security evaluation.
+- GDPR-Bench-Android (2025): arXiv:2511.00619. First automated GDPR compliance detection benchmark (1951 violations, 23 GDPR articles).
+- CloudBees State of Code Abundance 2026: 81% of enterprise tech leaders report production failures from AI-generated code.
 
-Software quality frameworks: ISO/IEC 25010, NIST SP 800-160, OWASP ASVS, CISQ.
+### Capability-focused Benchmarks
+HELM (Stanford CRFM), SWE-bench / Verified / Pro (Princeton + Scale), HumanEval (OpenAI Chen et al. 2021), MMLU (Hendrycks et al.), MBPP (Austin et al.), BIG-Bench (Srivastava et al.), MLE-bench (OpenAI).
 
-LLM-as-judge methodology: Zheng et al. (2023) MT-Bench.
+### Multi-dimensional Code Quality
+COMPASS (arXiv:2508.13757): 3D — correctness, efficiency, quality.
+RACE: 4D — readability, maintainability, correctness, efficiency.
+Both snippet-level, not system-level.
+
+### Software Quality & Security Standards
+ISO/IEC 25010 (software quality), NIST SP 800-160 (systems security engineering), OWASP ASVS (application security verification), CISQ.
+
+### LLM-as-Judge
+Zheng et al. (2023) "Judging LLM-as-a-Judge with MT-Bench" — bias mitigations cited in PRS §13.
+
+### Adjacent but Different Scope
+LLM Readiness Harness (Maiorano, arXiv:2603.27355): evaluates LLM applications themselves (groundedness, latency), not AI-generated code.
+
+See METHODOLOGY.md §16.5 for the full comparison table including which dimensions each benchmark covers.
