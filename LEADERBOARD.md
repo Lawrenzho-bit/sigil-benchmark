@@ -14,41 +14,96 @@ Do not cite as authoritative.
 
 ---
 
-## Preliminary Scores (PRS v0.4 methodology, single-run)
+## Preliminary Scores — claude-code (Claude Code CLI v2.1.144)
 
-### Task 01 — B2B SaaS Portal (terse variant)
+Generated 2026-05-19 to 2026-05-20. Static analysis only (deployment-dependent sub-components stubbed and return 0). PRS-Autonomous mode (no human review).
 
-Generated 2026-05-19. Static analysis only (deployment-dependent sub-components stubbed and return 0).
+| Task | Composite PRS | Sec | Ops | Scale | Comp | Cost | Files | Wall clock | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| 01 — B2B SaaS Portal (terse) | **155.0** | 20 | 22 | 42 | 23 | 48 | 42 | 7m 46s | complete |
+| 02 — Internal Admin Tool (terse) | — | — | — | — | — | — | 0 | 53s + 108s | **failed** (see note) |
+| 03 — Marketplace (terse) | **102.0** | 20 | 12 | 34 | 12 | 24 | 1 | 2m 29s | partial (1 file) |
+| 04 — Customer Support (terse) | **156.0** | 18 | 26 | 42 | 16 | 54 | 40 | 20m 46s | complete |
 
-| Tool | Composite | Security | Prod Ops | Scalability | Compliance | Cost | Wall clock |
-|---|---|---|---|---|---|---|---|
-| claude-code (Claude Code CLI, agentic, 2.1.144) | 155.0 | 20 | 22 | 42 | 23 | 48 | 7m 46s |
+### Notable cross-task observations
 
-#### Notable findings on `claude-code` Task 01 output
+**Strong scores across all complete builds**:
+- 100% OSS dependency ratio (Tasks 01, 03, 04)
+- Multi-cloud portability when Dockerfile is produced (Tasks 01, 04)
+- Zero high/critical CVEs at generation time (Tasks 01, 04)
+- Database indexing present in all builds that include schema
+
+**Consistent weaknesses across complete builds**:
+- GDPR cookie consent: low scores across all tasks (Claude Code rarely builds functional consent UI by default)
+- Observability: limited beyond `console.log` / `print()` in most outputs
+- Stateless architecture: mixed — Task 04 hit 10/10 (Redis session store) but Task 01 hit 4/10
+- Access controls: tasks default to "Admin/user only" rather than granular RBAC
+
+### Task 02 Failure Mode (Methodology Finding)
+
+Task 02 (Internal Admin Tool) failed twice in a row with claude-code agentic mode:
+- Run 1: 0 files in 53.9s
+- Run 2: 0 files in 107.6s
+
+**Diagnosis**: The terse prompt frames the task as building "for an existing SaaS company." Claude Code's agentic mode appears to interpret this as needing context from existing code that doesn't exist in the empty workdir, and exits without creating new files. A direct command-line invocation with the same prompt (outside the smoke harness) does produce a starter scaffold, suggesting the issue is sensitive to invocation context.
+
+**Methodology implication**: Task prompts that imply pre-existing context can confound agentic-mode evaluation. v0.5 prompt design should explicitly state "create from scratch in this empty directory" for tasks intended to test greenfield agentic behavior. This is a real diagnostic finding from the v0 scaffold — the kind of issue N=50 runs across N>1 tools would surface systematically.
+
+### Task 03 Partial Build (Methodology Finding)
+
+Task 03 (Marketplace) returned only **1 file** in 149s with PRS=102. The single file scored surprisingly high on dimensions like database indexing (10/10), CDN configuration (8/10), and audit logging (6/10).
+
+**Diagnosis**: Static-analysis pattern matching can be triggered by *mentions* of these capabilities in a document file (e.g., a README, design doc, or spec). The file Claude produced is likely a planning document that names many capabilities without implementing them.
+
+**Methodology implication**: v0.4's static-analysis-only sub-components risk false positives when scoring documentation rather than code. v0.5 should require minimum file count thresholds or distinguish source files from documentation in pattern-match scoring. The deployment-dependent sub-components (load tests, OWASP probes, functional compliance verification) would catch this naturally because empty endpoints don't pass tests. Another argument for getting deployment-tier scoring implemented.
+
+---
+
+## Per-Task Detail
+
+### Task 01 — B2B SaaS Portal
+
+[Full scoring data](results/smoke-claude-code-task_01_b2b_portal-terse/scoring.json)
+[Generated codebase (42 files)](results/smoke-claude-code-task_01_b2b_portal-terse/output_files/)
 
 Real strengths Sigil detected:
-
-- **Audit logging** (10/10): All sensitive actions recorded, immutable, actor+action+target captured
-- **Database indexing** (10/10): Indexes on all queried columns
-- **Multi-cloud portability** (10/10): Single Docker image runs on 5+ platforms
-- **Dependency CVE count** (10/10): Zero high/critical CVEs
-- **Secret management** (10/10): All secrets in env vars (regex-scanned)
-- **100% OSS dependency ratio**
-- **Container readiness** (8/10): Dockerfile + most 12-factor compliance
-- **Auto-scaling** (8/10): Configured for cloud deployment
+- Audit logging (10/10): immutable, actor+action+target captured
+- Database indexing (10/10): indexes on all queried columns
+- Multi-cloud portability (10/10): Dockerfile runs on 5+ platforms
+- Dependency CVEs (10/10): zero high/critical
+- Secret management (10/10): all secrets in env vars
 
 Real weaknesses Sigil flagged:
+- GDPR cookie consent (1/10): not implemented at all — claude-code built production auth + Stripe + audit but forgot cookie consent entirely
+- Time correctness (2/10): mixed timezone handling
+- Stateless architecture (4/10): mostly stateful, won't scale horizontally
+- Observability (4/10): unstructured logs only
 
-- **GDPR cookie consent** (1/10, P=0/3 F=0/4 D=1/3): Not implemented at all — Claude Code built production auth + Stripe + audit but forgot cookie consent entirely
-- **Time correctness** (2/10): Mixed timezone handling, no UTC enforcement
-- **Stateless architecture** (4/10): Mostly stateful, won't scale horizontally without refactor
-- **Observability** (4/10): Unstructured logs only, no metrics, no tracing
+### Task 03 — Marketplace
 
-#### Full scoring data
+[Full scoring data](results/smoke-claude-code-task_03_marketplace-terse/scoring.json)
+[Single file output](results/smoke-claude-code-task_03_marketplace-terse/output_files/)
 
-[`results/smoke-claude-code-01/scoring.json`](results/smoke-claude-code-01/scoring.json) — machine-readable, 50 sub-component breakdown.
+This score should be interpreted with caution — see the Task 03 Partial Build note above.
 
-[`results/smoke-claude-code-01/output_files/`](results/smoke-claude-code-01/output_files/) — the actual 42 source files generated by Claude Code, inspectable.
+### Task 04 — Customer Support Tool
+
+[Full scoring data](results/smoke-claude-code-task_04_support-terse/scoring.json)
+[Generated codebase (40 files)](results/smoke-claude-code-task_04_support-terse/output_files/)
+
+Notable strengths:
+- Stateless architecture (10/10): Redis-backed session store
+- Resource right-sizing (10/10): containers sized to workload
+- 100% OSS dependency ratio
+- Multi-cloud portability (10/10)
+- Health checks (8/10): `/health` with dependency checks
+- DB connection pooling (8/10): pool configured
+
+Notable weaknesses:
+- Access controls (2/10): only admin/user role
+- Audit logging (4/10): some actions logged, no immutability
+- Time correctness (6/10): UTC storage only, no TZ display
+- Async processing (2/10): blocking but threaded
 
 ---
 
@@ -56,17 +111,17 @@ Real weaknesses Sigil flagged:
 
 | Requirement | Status |
 |---|---|
-| N=50 runs per condition | ❌ Single run |
-| 3 prompt variants per task | ❌ Single variant |
+| N=50 runs per condition | ❌ Single run per task |
+| 3 prompt variants per task | ❌ Single variant (terse only for Tasks 02-04) |
 | PRS-Autonomous + PRS-Reviewed modes | ❌ Autonomous only |
 | Safety Refusal Rate (SRR) | ❌ Not tested |
 | Bootstrap percentile CIs | ❌ Insufficient N |
-| Benjamini-Hochberg correction | ❌ Single comparison |
+| Benjamini-Hochberg correction | ❌ No multi-comparison |
 | Pre-registration on OSF | ❌ Not pre-registered |
-| 10 tasks | ❌ 4 tasks specified, smoke runs on subset |
+| 10 tasks | ❌ 4 tasks specified |
 | 30% held-out test set | ❌ All test cases public |
-| Multiple tools | ❌ Single tool so far |
-| Independent governance sign-off | ❌ Governance not yet established |
+| Multiple tools | ❌ Single tool (claude-code only) |
+| Independent governance sign-off | ❌ Not established |
 | Independent audit | ❌ Not audited |
 
 The methodology is fully specified ([METHODOLOGY.md](METHODOLOGY.md)). The infrastructure to run a proper cycle exists. What's missing is the operational discipline (independent governance, OSF pre-registration, multiple tools) and the compute budget for N=50 runs × multiple tools × multiple variants.
@@ -83,15 +138,14 @@ git clone https://github.com/Lawrenzho-bit/sigil-benchmark.git
 cd sigil-benchmark
 pip install -e .
 
-# Run the smoke test (takes ~5-15 min depending on Claude Code response time)
-python scripts/smoke_claude_code.py
-
-# View results
-cat results/smoke-claude-code-01/scoring.json
-ls results/smoke-claude-code-01/output_files/
+# Run against any task (terse | verbose | casual)
+python scripts/smoke_claude_code.py --task task_01_b2b_portal --variant terse
+python scripts/smoke_claude_code.py --task task_04_support --variant terse
 ```
 
-Scores will vary run-to-run (LLM stochasticity). This is **the reason** N=50 is the methodology requirement.
+Scores will vary run-to-run (LLM stochasticity). The Task 02 failure and Task 03 minimal-output are real diagnostics; both should reproduce, but with some probability of producing different results across runs.
+
+This is **the reason** N=50 is the methodology requirement.
 
 ---
 

@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: support
+      POSTGRES_PASSWORD: support
+      POSTGRES_DB: support
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U support -d support"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://support:support@db:5432/support
+      JWT_SECRET: dev-secret-change-me
+      JWT_EXPIRES_MIN: 1440
+      INBOUND_WEBHOOK_SECRET: dev-inbound-secret
+    ports: ["8000:8000"]
+    volumes: [".:/app"]
+
+volumes:
+  pgdata:
