@@ -93,6 +93,9 @@ See **[rfcs/README.md](rfcs/README.md)** for the full process. Current RFCs:
 | Number | Title | Status |
 |---|---|---|
 | [RFC 0001](rfcs/0001-add-quality-dimension.md) | Add Maintainability/Quality as 6th Core Dimension (v0.5) | Draft |
+| [RFC 0003](rfcs/0003-specification-composition-integrity.md) | Specification & Composition Integrity as 7th Core Dimension (v0.6) | **Speculative** |
+
+Methodology forward-looking roadmap: see [METHODOLOGY §16.7](METHODOLOGY.md#167-future-paradigms-known-unincorporated-insights) for the full Future Paradigms log.
 
 ## Repository Structure
 

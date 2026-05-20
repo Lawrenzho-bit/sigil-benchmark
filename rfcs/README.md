@@ -51,6 +51,14 @@ What does **not** need an RFC:
 
 **Superseded** RFCs are updated with a header pointing to the newer RFC that supersedes them.
 
+**Speculative** RFCs document changes that anticipate a paradigm shift in the AI codegen landscape. They are intentionally not on the standard accept/reject path because the conditions for their adoption do not yet exist (e.g., the tools that would benefit from being measured by them are still in research). Speculative RFCs sit in the `rfcs/` directory as **option-value publishing**: if the paradigm materializes, the measurement framework is already drafted; if it doesn't, no methodology change is forced.
+
+Speculative RFCs are reviewed at least annually by the TSC (or maintainers, until TSC formation) to determine whether they should be:
+- Promoted to standard Draft status and entered into the normal comment period
+- Marked as Superseded by a newer Speculative or Draft RFC
+- Marked as Rejected (the anticipated paradigm did not materialize)
+- Kept Speculative for another year
+
 ## How to Propose an RFC
 
 1. Copy `0000-template.md` to `NNNN-short-name.md` where `NNNN` is the next available zero-padded number (e.g., `0002-add-payment-dimension.md`)
@@ -91,6 +99,7 @@ Numbers are assigned at the time the RFC is opened, not at proposal. Use the nex
 | Number | Title | Status | Comment Period | Decision |
 |---|---|---|---|---|
 | [0001](0001-add-quality-dimension.md) | Add Maintainability/Quality as 6th Core Dimension (v0.5) | Draft | TBD | TBD |
+| [0003](0003-specification-composition-integrity.md) | Specification & Composition Integrity as 7th Core Dimension (v0.6) | **Speculative** | n/a (annual review) | n/a |
 
 ## Inspirations
 

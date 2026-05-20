@@ -482,6 +482,65 @@ This validates that the dimension produces real signal rather than redundant inf
 
 Decision on whether v0.5 commits the change will be made via public RFC after v0.4 receives community feedback.
 
+## 16.7 Future Paradigms: Known Unincorporated Insights
+
+This section documents game-changing insights from the AI codegen evaluation landscape that PRS has not yet incorporated. Each is tagged with target version and rationale. This serves both as a roadmap and as evidence to TSC candidates / researchers that the methodology actively monitors the field.
+
+Insights are categorized as:
+- **Near-term** (v0.5 / v0.6) — concrete enough to draft RFCs
+- **Speculative** (v0.6+) — anticipates paradigm shifts; documented via Speculative RFCs
+- **Long-term** (v1.0+ or later) — requires significant infrastructure or empirical validation
+
+### 16.7.1 Near-Term
+
+| # | Insight | Target | Notes |
+|---|---|---|---|
+| 1 | **Multi-turn trajectory scoring** | v0.6 | Real agentic sessions are iterative. PRS currently scores single-shot output. RFC pending. |
+| 2 | **Production-derived prompts** (real distribution, not synthetic) | v0.6 | Per ProdCodeBench (Meta 2026). Parallel real-prompt suite from anonymized AI tool telemetry. |
+| 3 | **Latency / time-to-first-useful-output** as scored sub-component | v0.6 | Currently captured (`wall_clock_seconds`) but not scored. T01 took 7m vs T04's 20m — meaningful difference. |
+| 4 | **Iterative refinement quality** | v0.7 | How much does code improve across dialogue? Some tools generate good first drafts but can't fix bugs. |
+| 5 | **Generation cost vs output value frontier** | v0.6 | Cost Efficiency currently measures runtime cost only, not per-generation cost. |
+
+### 16.7.2 Speculative (Paradigm-Shift Anticipation)
+
+| # | Insight | RFC | Notes |
+|---|---|---|---|
+| 6 | **Specification & Composition Integrity** (architecture-driven generation paradigm) | [RFC 0003](rfcs/0003-specification-composition-integrity.md) | 7th core dimension for verification-driven AI codegen (Dafny / F\* / Lean / TLA+ paradigm). Speculative; annual review. |
+| 7 | **AI-as-compiler / verified codegen** | TBD | When AI generates formal specs → certified code, PRS needs new dimensions. Connected to #6. |
+| 8 | **Living specification stability** | TBD | Does correctness persist across edits? Measures stability-under-modification rather than single-shot. |
+
+### 16.7.3 Long-Term
+
+| # | Insight | Target | Notes |
+|---|---|---|---|
+| 9 | **Adversarial prompt robustness** (separate from Safety Refusal) | v0.7+ | Tools producing safe code on benign prompts may produce unsafe code under adversarial prompt engineering. |
+| 10 | **Composition safety across components** | v0.7+ | When two AI-generated components combine, what fails? Type mismatches, race conditions, security regressions. Connected to RFC 0003 §8. |
+| 11 | **Benchmark Validity Audit protocol** (anti-Goodhart meta-measurement) | v1.0+ | Periodic independent verification that the methodology still produces useful discrimination. Card et al., Bommasani et al. emphasize. |
+| 12 | **Cross-tool composition scoring** | v1.0+ | Score the composition pipeline (LLM A generates → tool B verifies → tool C deploys) rather than individual tools. Aligns with multi-tool production reality. |
+
+### Why Document These Now
+
+1. **Signals methodology maturity.** A standards body that knows what it doesn't cover is more credible than one that pretends to be complete.
+
+2. **Sets researcher expectations.** Visitors looking for "is this benchmark forward-looking?" find an explicit roadmap rather than having to infer.
+
+3. **Anchors TSC discussions.** Future methodology meetings can reference this section as the unfinished-business log.
+
+4. **Option-value publishing.** Each entry is essentially free to document but valuable if the paradigm materializes. RFC 0003 demonstrates the pattern.
+
+5. **Anti-obsolescence.** If a critic argues "PRS will be irrelevant when paradigm X arrives," the response is "we already track X; see §16.7." Reduces the "will this be useful in 3 years?" objection.
+
+### Review Cadence
+
+This section is reviewed every 12 months alongside Speculative RFCs. Entries can be:
+- **Promoted** to active development (RFC drafted, version target locked)
+- **Updated** with new evidence from the field
+- **Marked obsolete** if the insight no longer applies
+- **Added** when new game-changers emerge in the literature
+
+Last full review: 2026-05-20 (initial documentation).
+Next scheduled review: 2027-05.
+
 ## 17. Reproducibility
 
 - Methodology specification: public (this document)
