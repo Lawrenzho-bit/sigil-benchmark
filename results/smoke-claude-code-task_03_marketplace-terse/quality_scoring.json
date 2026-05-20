@@ -1,0 +1,100 @@
+{
+  "results_dir": "smoke-claude-code-task_03_marketplace-terse",
+  "files_scored": 1,
+  "dimension_score": 0.0,
+  "sub_components": [
+    {
+      "id": "qual_01_cyclomatic_complexity",
+      "name": "Cyclomatic complexity",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "ast_or_regex_cc",
+      "findings": {},
+      "notes": "No analyzable functions found"
+    },
+    {
+      "id": "qual_02_duplication",
+      "name": "Code duplication",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "block_hashing",
+      "findings": {},
+      "notes": "No code"
+    },
+    {
+      "id": "qual_03_function_size",
+      "name": "Function/method size",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "ast_or_regex_size",
+      "findings": {},
+      "notes": "No functions detected"
+    },
+    {
+      "id": "qual_04_documentation_coverage",
+      "name": "Documentation coverage",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "ast_jsdoc",
+      "findings": {},
+      "notes": "No public APIs detected"
+    },
+    {
+      "id": "qual_05_type_safety",
+      "name": "Type safety",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "tsconfig_or_ast",
+      "findings": {},
+      "notes": "Untyped language or no type-checking config"
+    },
+    {
+      "id": "qual_06_test_coverage",
+      "name": "Test coverage (proxy)",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "static_proxy",
+      "findings": {},
+      "notes": "No source code"
+    },
+    {
+      "id": "qual_07_linter_compliance",
+      "name": "Linter compliance (proxy)",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "smell_density",
+      "findings": {},
+      "notes": "No code"
+    },
+    {
+      "id": "qual_08_naming_consistency",
+      "name": "Naming convention consistency",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "regex_naming",
+      "findings": {},
+      "notes": "No identifiers analyzed"
+    },
+    {
+      "id": "qual_09_module_structure",
+      "name": "Module structure / separation of concerns",
+      "score": 0.0,
+      "rubric": "no apparent separation",
+      "tool_used": "directory_signal_heuristic",
+      "findings": {
+        "concern_signals_detected": [],
+        "max_depth": 1
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_10_dead_code",
+      "name": "Dead code / unused imports",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "ast_import_check",
+      "findings": {},
+      "notes": "No Python code (other langs not yet supported)"
+    }
+  ]
+}

@@ -362,8 +362,9 @@ PRS exists within a crowded landscape of AI codegen evaluation. This section map
 | [GDPR-Bench-Android](https://arxiv.org/pdf/2511.00619) (2025) | — | — | — | — | ✓ (GDPR only, Android only) | — | — |
 | CARE Index (CloudBees, 2026) | — | — | partial | — | — | ✓ | — |
 | **PRS v0.4 (this work)** | ✓ (via tests) | ✓ | ✓ | ✓ | ✓ | ✓ | partial |
+| **PRS v0.5 (candidate)** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | **✓** (proposed 6th dimension) |
 
-PRS is the first openly-published benchmark covering all five production-readiness dimensions in a single integrated rubric.
+PRS is the first openly-published benchmark covering all five production-readiness dimensions in a single integrated rubric. v0.5 proposes adding Maintainability/Quality as a 6th core dimension (see §16.6).
 
 ### 16.5.2 Methodological Rigor Comparison
 
@@ -409,6 +410,77 @@ Synthesizing the above, PRS's defensible novelty is in **integration and operati
 7. Statistical rigor stack (bootstrap CIs + BH correction + IRT + Cohen's d gates) applied to a production-readiness benchmark
 
 PRS does not claim novelty for: ISO/IEC 25010 framing (Sun et al.), joint security + functionality evaluation (Dai et al.), production-relevance motivation (ProdCodeBench), living-benchmark framework (HELM), or established statistical methods (Benjamini-Hochberg, bootstrap, IRT).
+
+## 16.6 v0.5 Candidate: Maintainability/Quality as 6th Dimension
+
+The current Related Work table (§16.5.1) shows PRS as "partial" on Code Quality. This gap is intentional in v0.4 — quality signals are distributed across other dimensions (Production Ops documentation, Scalability container readiness, Cost Efficiency right-sizing). For v0.5, we propose making Maintainability/Quality an explicit 6th core dimension at default 20% weight.
+
+### Motivation
+
+Sun et al. (2025), the closest prior work to PRS, treats Maintainability as a top-level dimension alongside Security and Performance Efficiency. ISO/IEC 25010 lists Maintainability as one of 8 quality characteristics. RACE (4 dimensions) and COMPASS (3 dimensions) both include code-quality measures. Industry tooling (SonarQube, CodeClimate, Codacy) treats it as a first-class concern.
+
+PRS v0.4's "partial" coverage hides this dimension from the headline number. Practitioners and procurement teams reading PRS scores deserve visibility into whether AI-generated code is maintainable, not just whether it's secure / scalable / compliant.
+
+### Proposed 10 Sub-Components
+
+| ID | Sub-component | Tool (preferred → fallback) |
+|---|---|---|
+| qual_01 | Cyclomatic complexity | radon / escomplex → AST + regex |
+| qual_02 | Code duplication | jscpd / pylint-duplicate → block hashing |
+| qual_03 | Function/method size | AST / regex |
+| qual_04 | Documentation coverage | interrogate / jsdoc-coverage → AST + JSDoc parse |
+| qual_05 | Type safety | tsc --strict / mypy --strict → tsconfig + AST |
+| qual_06 | Test coverage (with anti-tautology) | coverage.py + mutmut / c8 + cosmic-ray → static proxy |
+| qual_07 | Linter compliance | ruff / eslint → smell-density proxy |
+| qual_08 | Naming convention consistency | language-specific linter → regex pattern check |
+| qual_09 | Module structure / separation of concerns | LLM-as-judge with cross-model judging → directory signal heuristic |
+| qual_10 | Dead code / unused imports | vulture / ts-prune / depcheck → AST import check |
+
+Each sub-component scored 0-10, summed to dimension score 0-100. Rubric thresholds defined in `tasks/shared/scoring_rubric_v05.yaml` (when v0.5 lands).
+
+### Proposed Re-Weighting
+
+| Dimension | v0.4 weight | v0.5 proposed |
+|---|---|---|
+| Security | 25% | 20% |
+| Production Ops | 25% | 20% |
+| Scalability | 20% | 15% |
+| Compliance | 20% | 15% |
+| Cost Efficiency | 10% | 10% |
+| **Maintainability/Quality** | **—** | **20%** |
+
+Re-weighting subject to TSC RFC.
+
+### Validation: v0.5 Candidate Engine Tested
+
+A reference implementation (`harness/scoring/quality.py`) using static-analysis fallbacks was run against three real `claude-code` outputs from the v0 smoke tests:
+
+| Output | Files | Quality /100 | Notable |
+|---|---|---|---|
+| Task 01 — B2B Portal | 42 | **68** | TS strict + clean code, but only 2/10 documentation coverage |
+| Task 03 — Marketplace | 1 | **0** | Single planning doc — engine correctly flags as non-implementable |
+| Task 04 — Support Tool | 40 | **60** | Similar profile, lower type safety (Python without full hints) |
+
+The Quality engine **discriminates meaningfully** across outputs:
+- Confirms Task 03's "1-file marketplace" as a documentation-only output (PRS v0.4 missed this; Quality=0 catches it)
+- Surfaces a real weakness in Claude Code outputs — **documentation coverage** scored 2/10 on T01 (the LLM rarely writes JSDoc or docstrings for public APIs)
+- Differentiates T01 (TS strict) from T04 (less typed) on type safety
+
+This validates that the dimension produces real signal rather than redundant information already captured by the existing 5 dimensions.
+
+### What This Catches That v0.4 Misses
+
+- AI tools that write docs-only "proof of concept" outputs without real code (qual_03 marketplace exposed)
+- AI tools that produce technically correct but unmaintainable code (high complexity, long functions, undocumented)
+- AI tools that don't write tests (Sun et al.'s industry-priority finding)
+- AI tools that produce inconsistent naming or leftover dead code
+
+### Status
+
+**v0.4 (current):** Quality is "partial" — some signals distributed across other dimensions.
+**v0.5 candidate:** Quality becomes a 6th core dimension at 20% default weight. Engine implementation available now at `harness/scoring/quality.py`; ready for community review.
+
+Decision on whether v0.5 commits the change will be made via public RFC after v0.4 receives community feedback.
 
 ## 17. Reproducibility
 

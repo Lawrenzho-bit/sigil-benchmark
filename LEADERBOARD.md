@@ -18,12 +18,14 @@ Do not cite as authoritative.
 
 Generated 2026-05-19 to 2026-05-20. Static analysis only (deployment-dependent sub-components stubbed and return 0). PRS-Autonomous mode (no human review).
 
-| Task | Composite PRS | Sec | Ops | Scale | Comp | Cost | Files | Wall clock | Status |
-|---|---|---|---|---|---|---|---|---|---|
-| 01 — B2B SaaS Portal (terse) | **155.0** | 20 | 22 | 42 | 23 | 48 | 42 | 7m 46s | complete |
-| 02 — Internal Admin Tool (terse) | — | — | — | — | — | — | 0 | 53s + 108s | **failed** (see note) |
-| 03 — Marketplace (terse) | **102.0** | 20 | 12 | 34 | 12 | 24 | 1 | 2m 29s | partial (1 file) |
-| 04 — Customer Support (terse) | **156.0** | 18 | 26 | 42 | 16 | 54 | 40 | 20m 46s | complete |
+| Task | Composite PRS | Sec | Ops | Scale | Comp | Cost | Quality (v0.5)* | Files | Wall clock | Status |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 01 — B2B SaaS Portal (terse) | **155.0** | 20 | 22 | 42 | 23 | 48 | **68** | 42 | 7m 46s | complete |
+| 02 — Internal Admin Tool (terse) | — | — | — | — | — | — | — | 0 | 53s + 108s | **failed** (see note) |
+| 03 — Marketplace (terse) | **102.0** | 20 | 12 | 34 | 12 | 24 | **0** | 1 | 2m 29s | partial (1 file) |
+| 04 — Customer Support (terse) | **156.0** | 18 | 26 | 42 | 16 | 54 | **60** | 40 | 20m 46s | complete |
+
+\* **Quality** is a v0.5-candidate 6th dimension (see [METHODOLOGY §16.6](METHODOLOGY.md#166-v05-candidate-maintainabilityquality-as-6th-dimension)). Not included in composite PRS. Note that T03's Quality=0 correctly exposes the "documentation-only" output that the other dimensions partially missed.
 
 ### Notable cross-task observations
 

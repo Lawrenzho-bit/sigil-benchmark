@@ -30,6 +30,8 @@ from harness.orchestrator import BenchmarkConfig, Orchestrator
 from harness.scoring.compliance import ComplianceScoringEngine
 from harness.scoring.cost_efficiency import CostEfficiencyScoringEngine
 from harness.scoring.production_ops import ProductionOpsScoringEngine
+from harness.scoring.quality import QualityScoringEngine
+from harness.scoring.scalability import ScalabilityScoringEngine
 from harness.scoring.security import SecurityScoringEngine
 from harness.tools.claude import ClaudeAdapter
 from harness.tools.claude_code import ClaudeCodeAdapter
