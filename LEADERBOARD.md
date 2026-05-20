@@ -1,8 +1,8 @@
 # Sigil Benchmark Leaderboard
 
-**Status:** Preliminary (v0 scaffold). Not yet an official Sigil Index cycle.
+**Status:** Preliminary (v0). Not an official benchmark cycle.
 
-This page tracks scores produced by the Sigil Benchmark v0 reference implementation. Numbers here are **methodology demonstrations**, not the official Sigil Index. Official Sigil Index cycles will be published quarterly under Sigil Foundation governance once formed (target Q3 2026).
+This page tracks scores produced by the Sigil Benchmark v0 reference implementation. Numbers here are **methodology validation runs**, not pre-registered cycles. Once independent governance is in place, official cycles can be published per [METHODOLOGY §14](METHODOLOGY.md).
 
 ---
 
@@ -52,7 +52,7 @@ Real weaknesses Sigil flagged:
 
 ---
 
-## What's Missing for an Official Sigil Index Cycle
+## What's Missing for an Official Pre-Registered Cycle
 
 | Requirement | Status |
 |---|---|
@@ -63,15 +63,13 @@ Real weaknesses Sigil flagged:
 | Bootstrap percentile CIs | ❌ Insufficient N |
 | Benjamini-Hochberg correction | ❌ Single comparison |
 | Pre-registration on OSF | ❌ Not pre-registered |
-| 10 tasks | ❌ 4 tasks specified, 1 run |
+| 10 tasks | ❌ 4 tasks specified, smoke runs on subset |
 | 30% held-out test set | ❌ All test cases public |
-| Multiple tools | ❌ Single tool |
-| TSC sign-off | ❌ TSC not yet formed |
+| Multiple tools | ❌ Single tool so far |
+| Independent governance sign-off | ❌ Governance not yet established |
 | Independent audit | ❌ Not audited |
 
-The methodology is fully specified ([METHODOLOGY.md](METHODOLOGY.md)). The infrastructure to run a proper cycle exists. What's missing is the operational discipline (TSC, OSF pre-registration, multiple tools) and the compute budget for N=50 runs × multiple tools × multiple variants.
-
-Estimated to first credible Sigil Index Q1 cycle: 6-9 months from now.
+The methodology is fully specified ([METHODOLOGY.md](METHODOLOGY.md)). The infrastructure to run a proper cycle exists. What's missing is the operational discipline (independent governance, OSF pre-registration, multiple tools) and the compute budget for N=50 runs × multiple tools × multiple variants.
 
 ---
 
@@ -99,7 +97,7 @@ Scores will vary run-to-run (LLM stochasticity). This is **the reason** N=50 is 
 
 ## Submitting a Tool for Scoring
 
-Until the official Sigil Index cycles begin, this is an open repository — you can:
+This is an open repository — anyone can:
 
 1. Fork it
 2. Add a tool adapter under [`harness/tools/`](harness/tools/)
@@ -108,4 +106,4 @@ Until the official Sigil Index cycles begin, this is an open repository — you 
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-After Sigil Foundation forms, an official submission process will be published.
+If/when an independent governing body is established, a formal submission process will be published. Until then, community submissions are welcomed via PR.

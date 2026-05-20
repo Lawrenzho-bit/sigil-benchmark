@@ -1,8 +1,8 @@
 # Production Readiness Score (PRS) — Methodology v0.4
 
-**Status:** Public draft, intended for first RFC release
+**Status:** Public draft, open for community review
 **Methodology version:** 0.4.0
-**Steward:** [Sigil Foundation](https://github.com/Lawrenzho-bit/sigil-benchmark) (formation in progress)
+**Maintainer:** [Project authors](https://github.com/Lawrenzho-bit/sigil-benchmark) (independent governance planned — see [README §Governance](README.md#governance))
 **License:** Apache 2.0
 **Schema.org type:** ScholarlyArticle / Methodology
 
@@ -285,7 +285,7 @@ Where LLM-as-judge is used (e.g., documentation quality, privacy policy coherenc
 
 ## 14. Pre-Registration
 
-Before each cycle:
+The methodology requires pre-registration of each benchmark cycle:
 - Task selection methodology pre-registered
 - Hypotheses specified
 - Primary vs secondary comparisons designated
@@ -293,7 +293,9 @@ Before each cycle:
 - Statistical tests pre-committed
 - Sensitivity analyses planned
 
-Submitted to [OSF.io](https://osf.io/) before data collection begins. Deviations from pre-registration explicitly documented as "exploratory" in publication.
+Pre-registration is expected to be submitted to [OSF.io](https://osf.io/) before data collection for each cycle begins. Deviations from pre-registration are explicitly documented as "exploratory" in any published results.
+
+No official cycles have been run under this protocol yet. The first preliminary scores in this repository are methodology-validation runs, not pre-registered benchmark cycles.
 
 ---
 
@@ -342,12 +344,16 @@ If PRS doesn't correlate with real-world outcomes, methodology is revised.
 
 ## 18. Conflict of Interest Handling
 
-- Methodology and scoring owned by Sigil Foundation (independent, non-profit), not by any commercial entity
-- TSC members disclose all vendor affiliations; recuse from scoring related products
+Once an independent governing body is established, the following will apply:
+
+- Methodology and scoring owned by the independent body (not by any commercial entity)
+- TSC members disclose all vendor affiliations and recuse from scoring related products
 - Annual external audit (Big-4-equivalent firm, rotating)
 - Tool vendors cannot pay for inclusion or ranking
 - Double-blind scoring where feasible
-- Sigil Foundation funding sources publicly disclosed in each publication
+- Funding sources publicly disclosed in each publication
+
+Until the governing body is established, the project maintainers commit to these same principles informally. Any conflict of interest with this repository's results (e.g., maintainers benchmarking tools they have a relationship with) is disclosed in the relevant result files.
 
 ---
 
@@ -358,9 +364,9 @@ If PRS doesn't correlate with real-world outcomes, methodology is revised.
 - **Major (v1.0.0)**: Stable public release with validation data + TSC sign-off
 
 Roadmap:
-- v0.4 (current, Q3 2026): Public RFC, methodology paper, TSC formation
-- v0.5 (Q1 2027): IRT model + factor analysis fitted on first cycle data
-- v1.0 (Q3 2027): Stable release with 12 months of longitudinal validation
+- v0.4 (current): Open methodology draft, community review
+- v0.5 (target Q1 2027): IRT model + factor analysis fitted on first benchmark cycle data
+- v1.0 (target Q3 2027): Stable release with longitudinal validation and (ideally) independent governance in place
 
 ---
 

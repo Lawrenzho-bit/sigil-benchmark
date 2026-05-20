@@ -40,7 +40,7 @@ The Sigil Benchmark measures whether AI-generated code can safely face productio
 
 - **Methodology version**: PRS v0.4
 - **License**: Apache 2.0
-- **Steward**: Sigil Foundation (formation in progress)
+- **Maintainer**: Project authors (independent governance planned)
 - **Year**: 2026
 - **Approach**: Static analysis + dynamic probing across 5 dimensions and 50 sub-components
 - **Statistical rigor**: Bootstrap CIs (10,000 resamples), Benjamini-Hochberg FDR correction, Cohen's d effect-size gates, N=50 runs per condition

@@ -4,11 +4,13 @@
 [![Methodology: v0.4](https://img.shields.io/badge/methodology-v0.4-green.svg)](METHODOLOGY.md)
 [![Status: v0 scaffold](https://img.shields.io/badge/status-v0_scaffold-orange.svg)](#status)
 
-**The canonical reference benchmark for AI-generated software production readiness.**
+**An open methodology for measuring AI-generated software production readiness.**
 
 The Sigil Benchmark measures whether AI-generated code can safely face production traffic, real users, and adversarial conditions. It's the production-readiness layer of AI codegen evaluation — complementary to capability benchmarks like [HELM](https://crfm.stanford.edu/helm/), [SWE-bench](https://www.swebench.com/), [HumanEval](https://github.com/openai/human-eval), and [MLE-bench](https://github.com/openai/mle-bench).
 
 While other benchmarks measure *what AI tools can produce*, the **Production Readiness Score (PRS)** measures *whether that output is safe to ship*.
+
+> **Project status:** This is an early open-source release. The methodology is under active development. Governance is currently informal (project maintainers). The intent is to transition to an independent governing body as the project matures; see [Governance](#governance) below.
 
 ## What This Measures
 
@@ -28,9 +30,9 @@ Full methodology: **[METHODOLOGY.md](METHODOLOGY.md)** (v0.4, designed for top-v
 
 ## Why It Exists
 
-AI codegen tools are rapidly increasing in capability but vary enormously in production output quality. There is currently **no canonical benchmark** for whether AI-generated code is actually safe to ship. Procurement teams, regulators, journalists, and developers need an authoritative, transparent, methodologically rigorous reference.
+AI codegen tools are rapidly increasing in capability but vary enormously in production output quality. There is currently **no widely-adopted benchmark** for whether AI-generated code is actually safe to ship. Procurement teams, regulators, journalists, and developers need a transparent, methodologically rigorous reference.
 
-The Sigil Benchmark aims to be that reference — governed by [Sigil Foundation](#governance) as an independent standards body, with open methodology, open code, and open data.
+The Sigil Benchmark aims to be one open contribution to that gap — open methodology, open code, open data. We hope it can eventually be governed by an independent body; see [Governance](#governance).
 
 ## Status
 
@@ -119,15 +121,17 @@ See [CITATION.cff](CITATION.cff) for machine-readable citation metadata.
 
 ## Governance
 
-The Sigil Benchmark methodology is intended to be governed by **Sigil Foundation**, an independent standards body (formation in progress). The Foundation will:
+This repository is currently maintained informally by the project's authors. The methodology is published under Apache 2.0 to encourage open use and extension.
 
-- Own the methodology IP (Apache 2.0 license)
-- Convene a Technical Steering Committee (TSC) with rotating members from academia, industry, and regulatory backgrounds
+**Long-term intent:** As the project matures and the community grows, we plan to transition governance to an independent body (working name: *Sigil Foundation*). That body would:
+
+- Hold the methodology under Apache 2.0
+- Convene a Technical Steering Committee with rotating members from academia, industry, and regulatory backgrounds
 - Run annual methodology RFC processes
 - Coordinate independent audits
-- Publish the quarterly **Sigil Index**
+- Coordinate the publication of regular benchmark cycles
 
-Until formally incorporated, this repository serves as the working artifact for the methodology and reference implementation.
+This is aspirational, not currently in place. Until a formal governing body exists, contributions are reviewed by the project maintainers. If you'd like to help shape the governance structure, open a discussion or reach out.
 
 ## Related Work
 

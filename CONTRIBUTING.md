@@ -77,9 +77,9 @@ Changes to the PRS methodology itself (not just implementations) follow a separa
 2. Tag relevant maintainers for review
 3. After discussion, open a PR with the change clearly marked
 4. Methodology PRs require approval from 2+ maintainers
-5. Major version bumps (v0.x → v1.0+) require pre-registered RFC process
+5. Major version bumps (v0.x → v1.0+) follow a pre-registered RFC process
 
-Once Sigil Foundation is formed, methodology changes will go through the Technical Steering Committee (TSC) per [METHODOLOGY §14](METHODOLOGY.md).
+If/when an independent governing body is established (see [README §Governance](README.md#governance)), methodology changes will go through that body's Technical Steering Committee.
 
 ## Code Style
 
@@ -106,4 +106,4 @@ By contributing, you agree that your contributions will be licensed under [Apach
 
 ## Recognition
 
-All contributors are listed in the repository. Substantial methodology contributors may be invited to join the TSC once Sigil Foundation is formed.
+All contributors are listed in the repository. Substantial methodology contributors may be invited to join the Technical Steering Committee if/when an independent governing body is established.

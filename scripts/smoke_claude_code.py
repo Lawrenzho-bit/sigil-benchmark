@@ -1,12 +1,16 @@
 """
-Smoke test: run claude -p against Task 01 (B2B SaaS portal, terse variant)
-and score the output across all 5 PRS dimensions.
+Smoke test: run claude -p against a single Sigil task and score the output
+across all 5 PRS dimensions.
 
-This is the first real Sigil score from real AI-generated code, not mock data.
+Usage:
+    python scripts/smoke_claude_code.py [--task TASK_ID] [--variant terse|verbose|casual]
+
+Defaults: --task task_01_b2b_portal --variant terse
 """
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
 import sys
@@ -35,36 +39,55 @@ CLAUDE_CLI_PATH = "claude"  # npm-installed shim, on PATH
 console = Console(legacy_windows=False, force_terminal=True)
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Sigil smoke test against claude -p")
+    parser.add_argument("--task", default="task_01_b2b_portal", help="Task directory name under tasks/")
+    parser.add_argument("--variant", default="terse", choices=("terse", "verbose", "casual"))
+    parser.add_argument("--timeout", type=int, default=3600, help="Max seconds for claude -p")
+    parser.add_argument("--out-dir", default=None, help="Override output directory")
+    return parser.parse_args()
+
+
 async def smoke() -> None:
+    args = _parse_args()
+
     console.print(
         Panel.fit(
-            "[bold cyan]Sigil Smoke Test: claude -p on Task 01[/bold cyan]\n"
-            "[dim]First real Sigil score from real AI-generated code[/dim]",
+            f"[bold cyan]Sigil Smoke Test: claude -p on {args.task}[/bold cyan]\n"
+            f"[dim]Variant: {args.variant} | Real AI-generated code -> 5-dimension PRS scoring[/dim]",
             border_style="cyan",
         )
     )
 
     # Load task definition
-    task_dir = REPO_ROOT / "tasks" / "task_01_b2b_portal"
-    prompt = (task_dir / "prompt_terse.md").read_text(encoding="utf-8")
-    acceptance = (task_dir / "acceptance_criteria.md").read_text(encoding="utf-8")
+    task_dir = REPO_ROOT / "tasks" / args.task
+    if not task_dir.is_dir():
+        console.print(f"[red]Task directory not found: {task_dir}[/red]")
+        sys.exit(2)
+    prompt_path = task_dir / f"prompt_{args.variant}.md"
+    if not prompt_path.exists():
+        console.print(f"[red]Prompt variant not available: {prompt_path}[/red]")
+        sys.exit(2)
+    prompt = prompt_path.read_text(encoding="utf-8")
+    acceptance_path = task_dir / "acceptance_criteria.md"
+    acceptance = acceptance_path.read_text(encoding="utf-8") if acceptance_path.exists() else ""
+
     task = TaskDefinition(
-        task_id="task_01_b2b_portal",
-        name="B2B SaaS Portal",
-        prompts={"terse": prompt},
+        task_id=args.task,
+        name=args.task.replace("_", " ").title(),
+        prompts={args.variant: prompt},
         acceptance_criteria=acceptance,
         weight_template={"security": 0.25, "ops": 0.25, "scale": 0.20, "compliance": 0.20, "cost": 0.10},
     )
 
-    # Adapter — generous timeout since Task 01 produces ~50+ files
-    adapter = ClaudeCodeAdapter(cli_path=CLAUDE_CLI_PATH, timeout_seconds=3600)
+    adapter = ClaudeCodeAdapter(cli_path=CLAUDE_CLI_PATH, timeout_seconds=args.timeout)
 
     console.print(f"[bold]Tool:[/bold] {adapter.tool_id}")
     console.print(f"[bold]CLI:[/bold] {CLAUDE_CLI_PATH}")
-    console.print(f"[bold]Task:[/bold] {task.task_id} (terse variant)")
+    console.print(f"[bold]Task:[/bold] {task.task_id} ({args.variant} variant)")
     console.print(f"[bold]Prompt size:[/bold] {len(prompt)} chars")
     console.print()
-    console.print("[yellow]Invoking claude -p ... this may take 3-10 minutes.[/yellow]")
+    console.print("[yellow]Invoking claude -p ... this may take 5-20 minutes.[/yellow]")
 
     started = time.monotonic()
     tool_output = await adapter.generate(prompt, mode="prs_autonomous")
@@ -92,7 +115,8 @@ async def smoke() -> None:
         return
 
     # SAVE OUTPUTS IMMEDIATELY so we don't lose Claude's work if scoring crashes
-    results_dir = REPO_ROOT / "results" / "smoke-claude-code-01"
+    run_label = f"smoke-claude-code-{args.task}-{args.variant}"
+    results_dir = REPO_ROOT / "results" / (args.out_dir or run_label)
     results_dir.mkdir(parents=True, exist_ok=True)
     output_archive = results_dir / "output_files"
     output_archive.mkdir(exist_ok=True)
@@ -107,7 +131,7 @@ async def smoke() -> None:
 
     # Fake deployment (we're scoring statically)
     deployment = DeploymentResult(
-        run_id="smoke-claude-code-01",
+        run_id=run_label,
         target="none",
         success=True,
         deployed_at=datetime.now(timezone.utc),
@@ -166,7 +190,7 @@ async def smoke() -> None:
     scoring_summary = {
         "tool_id": adapter.tool_id,
         "task_id": task.task_id,
-        "variant": "terse",
+        "variant": args.variant,
         "mode": "prs_autonomous",
         "generation_wall_clock_seconds": gen_elapsed,
         "scoring_wall_clock_seconds": scoring_elapsed,
@@ -196,9 +220,9 @@ async def smoke() -> None:
     console.print()
     console.print(
         Panel.fit(
-            f"[bold green]✓ First real Sigil score recorded[/bold green]\n\n"
+            f"[bold green][OK] Sigil score recorded[/bold green]\n\n"
             f"Tool: [cyan]claude-code[/cyan]\n"
-            f"Task: [cyan]task_01_b2b_portal (terse)[/cyan]\n"
+            f"Task: [cyan]{task.task_id} ({args.variant})[/cyan]\n"
             f"Composite PRS: [bold cyan]{composite:.1f}[/bold cyan]\n"
             f"Generation time: [cyan]{gen_elapsed:.1f}s[/cyan]\n"
             f"Files produced: [cyan]{len(tool_output.output_files)}[/cyan]\n\n"
