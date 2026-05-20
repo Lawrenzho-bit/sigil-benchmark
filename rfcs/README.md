@@ -100,6 +100,7 @@ Numbers are assigned at the time the RFC is opened, not at proposal. Use the nex
 |---|---|---|---|---|
 | [0001](0001-add-quality-dimension.md) | Add Maintainability/Quality as 6th Core Dimension (v0.5) | Draft | TBD | TBD |
 | [0003](0003-specification-composition-integrity.md) | Specification & Composition Integrity as 7th Core Dimension (v0.6) | **Speculative** | n/a (annual review) | n/a |
+| [0004](0004-failure-mode-index.md) | Failure Mode Distribution as Parallel Metric (v0.5) | Draft | TBD | TBD |
 
 ## Inspirations
 
