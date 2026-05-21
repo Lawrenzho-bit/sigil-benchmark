@@ -14,25 +14,26 @@ Do not cite as authoritative.
 
 ---
 
-## Executive Summary (preliminary cycle, 2026-05-19 to 2026-05-21)
+## Preliminary Observations (single-tool single-day pilot, 2026-05-19 to 2026-05-21)
 
-For procurement teams, researchers, or RFC reviewers wanting the headline result without parsing the full per-run data:
+This section was previously labeled "Executive Summary" with "headline findings." [REVIEW_2026-05-21.md](REVIEW_2026-05-21.md) fix #3 re-toned it: this is a single-tool single-author pilot, not an official cycle. The observations below are *candidate* findings that need confirmation in larger-N cross-tool cycles before they can be cited as established facts.
 
 - **Tool evaluated**: claude-code CLI v2.1.144 → v2.1.145 (one tool, agentic spectrum position 4)
-- **Tasks covered**: 4 of 10 ([T01](tasks/task_01_b2b_portal/), [T02](tasks/task_02_admin_tool/), [T03](tasks/task_03_marketplace/), [T04](tasks/task_04_support/))
-- **Total runs collected**: 28+ runs (15+ silent_decline, 11+ complete/partial_complete, 1 wrong_artifact, 1 attempted_abort, 3+ timeout)
-- **PRS-when-scored range**: 128–218 (mean ≈ 171, N=17 scored runs)
-- **Quality dim range**: 56–72 (mean ≈ 65, when scored)
+- **Tasks covered**: 5 of 10 ([T01](tasks/task_01_b2b_portal/), [T02](tasks/task_02_admin_tool/), [T03](tasks/task_03_marketplace/), [T04](tasks/task_04_support/), [T05](tasks/task_05_analytics/) — T05 spec landed 2026-05-21)
+- **Total runs collected**: ~37 across all conditions (27 with on-disk records, ~10 historical silent_declines without records)
+- **PRS-when-scored**: 17 scoreable runs, range 117–230, median 162; per-condition spread typically 10–60 PRS points
+- **Quality dim range**: 56–72 (mean ≈ 65)
+- **Estimated cost**: ~$50–75 in claude-code subscription quota (~30 `claude -p` invocations)
 
-### Four headline findings
+### Candidate observations (need confirmation at N=50+ per condition with multiple tools)
 
-1. **N=1 benchmarking is dangerously unreliable.** The original headline "claude-code scores PRS 155 on T01" came from a single run. Independent re-runs of the same prompt produced 0 files in 3 of 4 attempts. True per-condition completion rate without an explicit execution suffix is 0–25%, not 100%. **The methodology's N=50-per-condition requirement is empirically justified, not theoretical.**
+1. **N=1 benchmarking gives stochastic results.** The original headline "claude-code scores PRS 155 on T01" was a single run; subsequent runs of the same prompt without the non-interactive suffix produced 0 files in 3 of 4 attempts. *Confirmation needed:* whether this holds across other agentic tools, or is specific to claude-code's current default behavior. **Likely robust** — the underlying mechanism (conversational refusal) is well-documented via the diagnostic tool.
 
-2. **Agentic CLI tools require a standardized non-interactive suffix for batch benchmarking.** Without it, `claude -p` responds conversationally ("Otherwise reply 'go' and I'll scaffold the repo..."), the session ends, and no files are produced. The fix ([`tasks/shared/non_interactive_suffix.md`](tasks/shared/non_interactive_suffix.md)) lifted completion rates dramatically — though not uniformly (T01 terse +NI is 33%, T04 +NI is 75–100%).
+2. **Agentic CLI tools may produce conversational refusals in non-interactive mode.** Captured directly via [`scripts/diag_claude_silent_decline.py`](scripts/diag_claude_silent_decline.py): claude responded "Otherwise reply 'go' and I'll scaffold the repo..." instead of writing files. The proposed [non-interactive suffix](tasks/shared/non_interactive_suffix.md) lifted completion rates. *Confirmation needed:* whether other tools (Cursor, GPT-5, codex CLI) exhibit the same pattern; whether the suffix changes the *quality* of output (not just the *completion rate*). **Single-tool single-author finding for now.**
 
-3. **PRS v0.4 has a false-positive class that the proposed Quality dimension catches sharply.** T03 wrong_artifact (1 markdown design doc) scored PRS 102 but Quality 0. T03 real codebase (35 files) scored PRS 138 and Quality 62. PRS-only discrimination = 36 points; PRS + Quality discrimination = 62 points (**1.7× improvement** from one added dimension). This is the cleanest empirical case for [RFC 0001](rfcs/0001-add-quality-dimension.md).
+3. **The proposed Quality dimension caught a real false-positive PRS v0.4 missed.** T03 wrong_artifact run (1 markdown doc) scored PRS 102 but Quality 0. T03 real codebase scored PRS 138 and Quality 62. Discrimination gap widens from 36 to 62 points when Quality is added. *Confirmation needed:* whether the same widening holds on other false-positive cases (only one observed in this pilot). **Strongest single empirical case for [RFC 0001](rfcs/0001-add-quality-dimension.md), but it is one case.**
 
-4. **Failure modes are categorically diverse and need their own taxonomy.** 5 of 7 [RFC 0004](rfcs/0004-failure-mode-index.md) modes were observed organically in this cycle: `complete`, `silent_decline`, `wrong_artifact`, `attempted_abort`, `timeout`. The remaining two (`partial_complete`, `hard_refusal`) emerged once the report introduced timeout-with-scored-output edge case handling. PRS-only reporting lumps all these together at ≈ 0 and loses first-order procurement signal.
+4. **At least 5 of 7 [RFC 0004](rfcs/0004-failure-mode-index.md) failure modes appear in real data.** Observed organically: `complete`, `silent_decline`, `wrong_artifact`, `attempted_abort`, and (after taxonomy correction — see REVIEW fix #2) `partial_complete` for productive-but-truncated runs. `timeout` and `hard_refusal` remain synthetic-only in this pilot. *Confirmation needed:* whether the taxonomy is exhaustive or whether a new mode needs to be added (the cycle already surfaced one such case — productive-but-harness-killed — leading to the proposed `harness_truncated` 8th mode in RFC 0004 §5.5).
 
 ### Per-condition completion rates
 
