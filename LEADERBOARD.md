@@ -40,7 +40,9 @@ Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent s
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 108s | 2 | silent_decline |
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 806s | 3 | attempted_abort (exit 1) |
 | 02 — Admin Tool (terse) | +NI | **156.0** | 20 | 30 | 32 | 18 | 56 | **70** | 36 | 9m 09s | 1 | complete |
+| 02 — Admin Tool (terse) | +NI | **128.0** | 20 | 24 | 20 | 12 | 52 | **66** | 17 | ~9m gen | 2 | complete |
 | 02 — Admin Tool (terse) | +NI | **146.0** | 20 | 24 | 32 | 18 | 52 | **60** | 26 | 39m 30s | 3 | complete |
+| 02 — Admin Tool (terse) | +NI | — | — | — | — | — | — | — | 0 | 3600s | 4 | **timeout** |
 | 03 — Marketplace (terse) | no-NI | **102.0** | 20 | 12 | 34 | 12 | 24 | **0** | 1 | 2m 29s | 1 | wrong_artifact (docs only) |
 | 03 — Marketplace (terse) | no-NI | — | — | — | — | — | — | — | 0 | 63s | 2 | silent_decline |
 | 03 — Marketplace (terse) | +NI | **138.0** | 20 | 20 | 48 | 10 | 40 | **62** | 35 | 8m 55s | 1 | complete |

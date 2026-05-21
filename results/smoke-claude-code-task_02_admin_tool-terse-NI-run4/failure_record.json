@@ -1,0 +1,25 @@
+{
+  "tool_id": "claude-code",
+  "task_id": "task_02_admin_tool",
+  "variant": "terse",
+  "non_interactive_suffix_applied": true,
+  "generation_wall_clock_seconds": 29525.092999999993,
+  "completion_status": "timeout",
+  "refusal_reason": "Exceeded 3600s timeout; 0 partial files preserved",
+  "files_produced": 0,
+  "failure_mode": {
+    "label": "timeout",
+    "reasoning": "wall_clock 3600.0s at/near configured timeout 3600.0s",
+    "file_count": 0,
+    "doc_ratio": null,
+    "wall_clock_seconds": 3600.0,
+    "returncode": -1
+  },
+  "raw_response": {
+    "returncode": -1,
+    "timed_out": true,
+    "files_collected": 0,
+    "stdout_tail": "API Error: Stream idle timeout - partial response received\n",
+    "stderr_tail": ""
+  }
+}

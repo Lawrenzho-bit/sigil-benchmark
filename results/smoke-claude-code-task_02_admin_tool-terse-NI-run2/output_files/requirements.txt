@@ -1,0 +1,8 @@
+Django==5.0.6
+psycopg[binary]==3.1.19
+gunicorn==22.0.0
+djangosaml2==1.9.3
+mozilla-django-oidc==4.0.1
+python-dotenv==1.0.1
+redis==5.0.4
+django-redis==5.4.0
