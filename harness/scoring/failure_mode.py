@@ -1,6 +1,18 @@
 """
 Failure Mode classifier — reference implementation of RFC 0004.
 
+STATUS: pre-comment-period draft (2026-05-21).
+========================================================
+This module ships alongside RFC 0004 before the RFC's formal
+comment period has occurred (`rfcs/README.md` specifies 2 weeks
+for standard RFCs). Comment-period feedback may change the
+taxonomy (e.g., adding a `harness_truncated` mode to distinguish
+"tool hung" from "harness killed productive run"), in which case
+this module's enums + criteria will need revision. Treat the
+classifier as a working draft, not as locked methodology.
+========================================================
+
+
 Classifies each run into one of seven categorical labels:
 
   complete           — files >= min_files AND criteria met
