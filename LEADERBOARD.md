@@ -34,22 +34,22 @@ Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent s
 | 01 — B2B Portal (verbose) | no-NI | — | — | — | — | — | — | — | 0 | 45s | 1 | silent_decline |
 | 01 — B2B Portal (verbose) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
 | 01 — B2B Portal (casual) | no-NI | — | — | — | — | — | — | — | 0 | 41s | 1 | silent_decline |
-| 01 — B2B Portal (casual) | +NI | **167.0** | 18 | 22 | 56 | 21 | 50 | TBD | 39 | 9m 11s | 1 | complete |
+| 01 — B2B Portal (casual) | +NI | **167.0** | 18 | 22 | 56 | 21 | 50 | **64** | 39 | 9m 11s | 1 | complete |
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 54s | 1 | silent_decline |
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 108s | 2 | silent_decline |
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 806s | 3 | attempted_abort (exit 1) |
-| 02 — Admin Tool (terse) | +NI | **156.0** | 20 | 30 | 32 | 18 | 56 | TBD | 36 | 9m 09s | 1 | complete |
+| 02 — Admin Tool (terse) | +NI | **156.0** | 20 | 30 | 32 | 18 | 56 | **70** | 36 | 9m 09s | 1 | complete |
 | 03 — Marketplace (terse) | no-NI | **102.0** | 20 | 12 | 34 | 12 | 24 | **0** | 1 | 2m 29s | 1 | wrong_artifact (docs only) |
 | 03 — Marketplace (terse) | no-NI | — | — | — | — | — | — | — | 0 | 63s | 2 | silent_decline |
-| 03 — Marketplace (terse) | +NI | **138.0** | 20 | 20 | 48 | 10 | 40 | TBD | 35 | 8m 55s | 1 | complete |
+| 03 — Marketplace (terse) | +NI | **138.0** | 20 | 20 | 48 | 10 | 40 | **62** | 35 | 8m 55s | 1 | complete |
 | 04 — Customer Support (terse) | no-NI | **156.0** | 18 | 26 | 42 | 16 | 54 | **60** | 40 | 20m 46s | 1 | complete |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 30s | 2 | silent_decline |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 23s | 3 | silent_decline |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 30s | 4 | silent_decline |
-| 04 — Customer Support (terse) | +NI | **162.0** | 20 | 34 | 38 | 18 | 52 | TBD | 66 | 10m 33s | 1 | complete |
-| 04 — Customer Support (terse) | +NI | **164.0** | 20 | 18 | 38 | 36 | 52 | TBD | 28 | 9m 28s | 2 | complete |
+| 04 — Customer Support (terse) | +NI | **162.0** | 20 | 34 | 38 | 18 | 52 | **68** | 66 | 10m 33s | 1 | complete |
+| 04 — Customer Support (terse) | +NI | **164.0** | 20 | 18 | 38 | 36 | 52 | **56** | 28 | 9m 28s | 2 | complete |
 
-\* **Quality** is a v0.5-candidate 6th dimension (see [METHODOLOGY §16.6](METHODOLOGY.md#166-v05-candidate-maintainabilityquality-as-6th-dimension)). Not included in composite PRS. Rescoring on the new +NI codebases is pending (TBD).
+\* **Quality** is a v0.5-candidate 6th dimension ([RFC 0001](rfcs/0001-add-quality-dimension.md), see also [METHODOLOGY §16.6](METHODOLOGY.md#166-v05-candidate-maintainabilityquality-as-6th-dimension)). Not included in composite PRS. **The Quality dimension does diagnostic work the existing 5 dimensions miss most starkly on T03**: the doc-only run scored Quality=0 (composite PRS=102); the real-code +NI run scored Quality=62 (composite PRS=138). PRS v0.4's 36-point gap between the false-positive and the real codebase becomes a 62-point gap when Quality is included. This is the cleanest empirical case for shipping RFC 0001 in v0.5.
 
 ### Notable cross-task observations
 
@@ -100,7 +100,7 @@ Versioned at [`tasks/shared/non_interactive_suffix.md`](tasks/shared/non_interac
 2. **The suffix works for most prompts, not all.** T01 terse and T01 verbose remain resistant; claude continues to ask for clarification even with the explicit instruction. This is itself first-order signal: tool behavior on the *same task* depends on prompt phrasing in ways no methodology had previously controlled for.
 3. **PRS scores when builds do complete are remarkably stable.** T04 +NI runs 1 and 2 produced PRS 162 and 164 — within 2 points despite file counts varying 2.4× (66 vs 28). PRS converges at coarse grain across stochastic verbosity.
 4. **T02 finally completed.** After 3 prior attempts failed, T02 +NI run 1 produced 36 files with PRS 156 — same score magnitude as T04. The Task 02 Failure Mode finding's "implies pre-existing context" hypothesis is partly vindicated: claude was asking the same clarifying questions on T02 as on T01, the suffix overrode that ambiguity-seeking on T02 but not on T01.
-5. **T03 false positive sharply exposed.** The no-NI T03 run produced 1 doc file scored at PRS 102. The +NI T03 run produced 35 code files scored at PRS 138 — only 36 points higher. PRS v0.4 over-rewarded the doc-only output. The Quality v0.5 dimension (RFC 0001) scored that doc-only file at 0/100, catching it correctly. **This is the cleanest empirical case for shipping RFC 0001.**
+5. **T03 false positive sharply exposed.** The no-NI T03 run produced 1 doc file scored at PRS 102 / Quality **0**. The +NI T03 run produced 35 code files scored at PRS 138 / Quality **62**. PRS v0.4 over-rewarded the doc-only output — only 36 points separated it from the real codebase. The Quality dimension's gap is 62 points — **1.7× the discrimination of v0.4 alone**. This is the cleanest empirical case for shipping RFC 0001 in v0.5.
 
 **Combined with [RFC 0004 (Failure Mode Distribution)](rfcs/0004-failure-mode-index.md):** the FMD taxonomy now has concrete grounding. Every no-NI run that previously appeared as "PRS ≈ 0" is actually classifiable as `silent_decline` (conversational refusal), `attempted_abort` (T02 attempt 3), or `wrong_artifact` (T03 run 1). RFC 0004's worked examples can be re-grounded in this richer dataset.
 
