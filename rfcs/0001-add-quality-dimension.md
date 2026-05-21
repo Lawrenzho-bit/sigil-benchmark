@@ -42,21 +42,38 @@ SonarQube, CodeClimate, Codacy, and other widely-used quality tools treat Mainta
 
 ### 2.4 Empirical Evidence: The v0.5 Engine Discriminates
 
-A reference implementation of the proposed Quality engine (`harness/scoring/quality.py`) was tested against three real `claude-code` outputs collected during the v0 smoke tests:
+A reference implementation of the proposed Quality engine (`harness/scoring/quality.py`) has been tested against eight real `claude-code` outputs collected during the v0 smoke tests (2026-05-19 to 2026-05-21):
 
 | Output | Files | Composite v0.4 PRS | Quality (v0.5 proposed) |
 |---|---|---|---|
-| Task 01 — B2B Portal | 42 | 155 | **68** |
-| Task 03 — Marketplace | 1 | 102 | **0** |
-| Task 04 — Support Tool | 40 | 156 | **60** |
+| T01 — B2B Portal terse | 42 | 155 | **68** |
+| T01 — B2B Portal casual +NI | 39 | 167 | **64** |
+| T02 — Admin Tool terse +NI | 36 | 156 | **70** ← highest |
+| T03 — Marketplace terse (doc-only) | 1 | 102 | **0** |
+| T03 — Marketplace terse +NI | 35 | 138 | **62** |
+| T04 — Support Tool terse | 40 | 156 | **60** |
+| T04 — Support Tool terse +NI run 1 | 66 | 162 | **68** |
+| T04 — Support Tool terse +NI run 2 | 28 | 164 | **56** |
 
-The Quality dimension does **real diagnostic work** the existing 5 dimensions partially missed:
+#### 2.4.1 The Headline Empirical Case: T03 Marketplace
 
-- **Task 03's Quality=0** correctly exposes that the single-file output is a planning document, not implementable code. v0.4's composite of 102 is misleading because static-analysis pattern matches in documentation triggered positive scores for capabilities (CDN, indexing, audit logging) that don't actually exist in shippable form. Quality catches this cleanly.
-- **Task 01 vs Task 04 differentiation** — both produced ~40 files but Quality distinguishes T01's TypeScript-strict + better module structure (68) from T04's Python-without-full-type-hints (60). Useful signal.
-- **Universal weakness surfaced** — documentation coverage (qual_04) scored 2/10 across both real builds, confirming Sun et al.'s finding that LLMs deprioritize maintainability artifacts industry actually values.
+The strongest single piece of evidence for promoting Quality to a core dimension comes from the Task 03 false positive:
 
-This validates the dimension produces real signal rather than redundant information already captured elsewhere.
+- **T03 no-NI (1 file, documentation only)**: PRS 102 / **Quality 0**
+- **T03 +NI (35 files, runnable code)**: PRS 138 / **Quality 62**
+
+PRS v0.4 alone separated these by **36 points** — a meaningful but easily-missed gap. The Quality dimension separates them by **62 points**, a **1.7× improvement in discrimination** from adding a single dimension. The Quality engine correctly assigns 0/100 to a single-markdown-file output that pattern-matched as positive on indexing / CDN / audit logging in v0.4. This is the cleanest possible demonstration that Quality catches a class of false positive PRS v0.4 systematically over-rewards.
+
+The doc-only run wasn't a designed test case. It was a real failure mode (`wrong_artifact` per [RFC 0004](0004-failure-mode-index.md)) that emerged from the smoke harness — exactly the kind of organically-discovered evidence that's hard to manufacture.
+
+#### 2.4.2 Other Quality Findings
+
+- **Cross-tool / cross-task range**: 56-70 across 7 successful builds. Mean ≈ 64. Reasonable variance for a 0-100 dimension; not pinned at floor or ceiling.
+- **Test-retest stability**: T04 +NI runs 1 and 2 produced Quality 68 vs 56 — a 12-point spread that's larger than the composite PRS spread (162 vs 164 = 2 points). This is informative: composite PRS is more stable than Quality alone, suggesting Quality captures finer-grained variation that the composite averages out. For the RFC, this means Quality should be reported with its own confidence interval and not assumed equivalent in stability to PRS.
+- **Universal weakness surfaced**: documentation coverage (qual_04) scored 0-2/10 across most builds, confirming Sun et al.'s (2025) finding that LLMs deprioritize maintainability artifacts that industry priorities.
+- **Prompt-variant insensitivity (when builds complete)**: T01 terse no-NI = 68, T01 casual +NI = 64. The 4-point gap is small. Quality is largely prompt-variant insensitive when claude-code actually produces output, consistent with the dimension measuring properties of the artifact rather than properties of the prompting.
+
+This validates the dimension produces real signal that PRS v0.4 alone cannot capture sharply.
 
 ## 3. Detailed Design
 

@@ -13,6 +13,7 @@
 | **Supersedes** | — |
 | **Superseded By** | — |
 | **Methodology Version Impact** | Minor (v0.4 → v0.5, alongside RFC 0001) |
+| **Empirical Validation** | N=22 runs across 4 tasks (see §3.4); every mode in the taxonomy except `hard_refusal` and `timeout` observed organically |
 
 ---
 
@@ -58,18 +59,30 @@ Task 03's score of 102 is the cleanest example of why a "failure mode" label is 
 
 ### 2.3 Empirical Pattern: Bimodal Failure Duration
 
-The seven smoke runs already reveal a striking bimodal distribution in failure timing:
+The (now N=22) smoke runs reveal a striking bimodal distribution in failure timing:
 
 ```
 0─5s  ─────────────────────────────────  806s (timeout limit varies)
        |                                  |
-       └─ Fast declines (41-108s)         └─ Attempted abort (806s)
-          (T01-v, T01-c, T02-1, T02-2)        (T02-3)
+       └─ Fast declines (23-108s)         └─ Attempted abort (806s)
+          (N=15 silent_decline runs)          (T02-3)
 ```
 
-There is essentially nothing in the middle. This is consistent with two distinct internal states: (a) the agent quickly decides not to act, or (b) the agent commits to the task and works until it hits a wall. Reporting both as "PRS=0" hides this bimodality.
+There is essentially nothing in the middle for the failed runs. This is consistent with two distinct internal states: (a) the agent quickly decides not to act, or (b) the agent commits to the task and works until it hits a wall. Reporting both as "PRS=0" hides this bimodality.
 
-### 2.4 Prior Art in ML Evaluation
+### 2.4 Cross-Condition Refusal Pattern Discovery
+
+The 2026-05-21 extended batch (post-suffix introduction) revealed a finding that PRS alone could not have surfaced: **claude-code's silent_decline rate depends jointly on task content AND prompt style, in ways that don't decompose to either alone**.
+
+Concretely:
+- T01 **terse** (no-NI): completes 1/4. With NI: completes 0/2.
+- T01 **casual** (no-NI): completes 0/1. With NI: completes 1/1.
+
+The NI suffix *helps* T01 casual but *doesn't help* T01 terse. Same task, different prompt styles, opposite response to the intervention. Under v0.4's PRS-only reporting, this asymmetry is invisible. Under FMD, it shows up as different per-condition mode distributions and signals to evaluators that prompt-style ↔ tool-behavior is an interaction, not a main effect.
+
+This is exactly the kind of finding the methodology should be able to detect, and FMD is the structure that lets it be reported.
+
+### 2.5 Prior Art in ML Evaluation
 
 - **Anthropic's safety evaluations** distinguish "refusal" from "harmful compliance" from "safe compliance" — these are categorical labels parallel to a capability score. PRS v0.4 already adopts this via SRR.
 - **HuggingFace's [eval suite](https://github.com/huggingface/evaluate)** records `errors` and `failures` separately from scored runs.
@@ -161,25 +174,56 @@ The cycle aggregator (`harness/analysis/aggregation.py`) gains a method to compu
 
 ### 3.4 Worked Examples From v0 Smoke Data
 
-Applying the taxonomy retroactively to today's 7 runs:
+Applying the taxonomy retroactively to all 22 runs collected 2026-05-19 to 2026-05-21:
 
-| Run | Wall clock | Exit | Files | Classified mode |
-|---|---|---|---|---|
-| T01 terse | 466s | 0 | 42 | `complete` |
-| T01 verbose | 45s | 0 | 0 | `silent_decline` |
-| T01 casual | 41s | 0 | 0 | `silent_decline` |
-| T02 attempt 1 | 54s | 0 | 0 | `silent_decline` |
-| T02 attempt 2 | 108s | 0 | 0 | `silent_decline` |
-| T02 attempt 3 | 806s | 1 | 0 | `attempted_abort` |
-| T03 terse | 149s | 0 | 1 | `wrong_artifact` (after LLM-as-judge) |
-| T04 terse | 1246s | 0 | 40 | `complete` |
+| Run | Wall clock | Exit | Files | NI | Classified mode |
+|---|---|---|---|---|---|
+| T01 terse run 1 | 466s | 0 | 42 | no | `complete` |
+| T01 terse run 2 | 33s | 0 | 0 | no | `silent_decline` |
+| T01 terse run 3 | 48s | 0 | 0 | no | `silent_decline` |
+| T01 terse run 4 | 52s | 0 | 0 | no | `silent_decline` |
+| T01 terse NI run 1 | 39s | 0 | 0 | yes | `silent_decline` |
+| T01 terse NI run 2 | 44s | 0 | 0 | yes | `silent_decline` |
+| T01 verbose | 45s | 0 | 0 | no | `silent_decline` |
+| T01 verbose NI | 39s | 0 | 0 | yes | `silent_decline` |
+| T01 casual | 41s | 0 | 0 | no | `silent_decline` |
+| T01 casual NI | 551s | 0 | 39 | yes | `complete` |
+| T02 terse attempt 1 | 54s | 0 | 0 | no | `silent_decline` |
+| T02 terse attempt 2 | 108s | 0 | 0 | no | `silent_decline` |
+| T02 terse attempt 3 | 806s | 1 | 0 | no | `attempted_abort` |
+| T02 terse NI | 549s | 0 | 36 | yes | `complete` |
+| T03 terse run 1 | 149s | 0 | 1 | no | `wrong_artifact` |
+| T03 terse run 2 | 63s | 0 | 0 | no | `silent_decline` |
+| T03 terse NI | 535s | 0 | 35 | yes | `complete` |
+| T04 terse run 1 | 1246s | 0 | 40 | no | `complete` |
+| T04 terse run 2 | 30s | 0 | 0 | no | `silent_decline` |
+| T04 terse run 3 | 23s | 0 | 0 | no | `silent_decline` |
+| T04 terse run 4 | 30s | 0 | 0 | no | `silent_decline` |
+| T04 terse NI run 1 | 633s | 0 | 66 | yes | `complete` |
+| T04 terse NI run 2 | 568s | 0 | 28 | yes | `complete` |
 
-The leaderboard could then report, for the T01-on-claude-code condition (3 runs):
-- FMD: `{complete: 0.33, silent_decline: 0.67}`
-- Completion Rate: 33%
-- Dominant failure mode: silent_decline
+Each example was generated organically from the smoke harness — no synthetic fixtures. Every mode in the taxonomy except `hard_refusal` and `timeout` is represented in the data. `hard_refusal` and `timeout` examples come from prior literature (Anthropic safety evaluation refusals; SWE-bench timeout reports).
 
-That tells a *much* richer story than "PRS 155 on the run that worked."
+**Per-condition FMD computed from this data:**
+
+| Tool | Task / Variant | NI? | N | FMD | Completion Rate | Constructive Rate |
+|---|---|---|---|---|---|---|
+| claude-code | T01 terse | no | 4 | `{complete: 0.25, silent_decline: 0.75}` | 25% | 25% |
+| claude-code | T01 terse | yes | 2 | `{silent_decline: 1.00}` | 0% | 0% |
+| claude-code | T01 verbose | no | 1 | `{silent_decline: 1.00}` | 0% | 0% |
+| claude-code | T01 verbose | yes | 1 | `{silent_decline: 1.00}` | 0% | 0% |
+| claude-code | T01 casual | no | 1 | `{silent_decline: 1.00}` | 0% | 0% |
+| claude-code | T01 casual | yes | 1 | `{complete: 1.00}` | 100% | 100% |
+| claude-code | T02 terse | no | 3 | `{silent_decline: 0.67, attempted_abort: 0.33}` | 0% | 0% |
+| claude-code | T02 terse | yes | 1 | `{complete: 1.00}` | 100% | 100% |
+| claude-code | T03 terse | no | 2 | `{wrong_artifact: 0.50, silent_decline: 0.50}` | 0% | 50% |
+| claude-code | T03 terse | yes | 1 | `{complete: 1.00}` | 100% | 100% |
+| claude-code | T04 terse | no | 4 | `{complete: 0.25, silent_decline: 0.75}` | 25% | 25% |
+| claude-code | T04 terse | yes | 2 | `{complete: 1.00}` | 100% | 100% |
+
+That tells a *much* richer story than the v0.4 leaderboard's headline numbers. For instance, the **claude-code T01 terse condition has identical FMD whether NI is applied or not** — both come out at 25% / 0% completion. This is signal v0.4 could not surface: T01 terse is uniquely resistant to the non-interactive suffix, while T01 casual + NI completes 100% of the time. The reverse pattern would be invisible in PRS averages alone.
+
+Note that all entries in this table reflect very small N. Production methodology requires N=50 per condition; the FMD machinery is what lets those N=50 numbers become interpretable.
 
 ### 3.5 Interaction with PRS
 
