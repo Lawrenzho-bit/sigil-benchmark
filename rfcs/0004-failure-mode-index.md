@@ -13,7 +13,8 @@
 | **Supersedes** | — |
 | **Superseded By** | — |
 | **Methodology Version Impact** | Minor (v0.4 → v0.5, alongside RFC 0001) |
-| **Empirical Validation** | N=22 runs across 4 tasks (see §3.4); every mode in the taxonomy except `hard_refusal` and `timeout` observed organically |
+| **Empirical Validation** | N=23 runs across 4 tasks (see §3.4); every mode in the taxonomy except `hard_refusal` and `timeout` observed organically |
+| **Reference Implementation** | [`harness/scoring/failure_mode.py`](../harness/scoring/failure_mode.py) — classifier validates 23/23 historical runs against §3.4 manual taxonomy. See [`scripts/classify_historical_runs.py`](../scripts/classify_historical_runs.py). |
 
 ---
 
@@ -23,7 +24,7 @@ This RFC proposes adding a **Failure Mode Distribution (FMD)** as a parallel rep
 
 The FMD is reported as a per-tool-per-task frequency distribution across N runs, with the **Completion Rate** as the primary scalar summary. It does **not** modify the composite PRS calculation. It supplements PRS the way Safety Refusal Rate (SRR) supplements it: a parallel behavioral metric, not an additive scoring dimension.
 
-A classification engine for the seven modes is straightforward to implement from data the smoke harness already captures (`completion_status`, `wall_clock_seconds`, `returncode`, `refusal_reason`, file count, file types). Implementation is deferred to RFC acceptance but the empirical evidence supporting the taxonomy already exists in the v0 smoke runs.
+A classification engine for the seven modes is straightforward to implement from data the smoke harness already captures (`completion_status`, `wall_clock_seconds`, `returncode`, `refusal_reason`, file count, file types). **A reference implementation already exists** ([`harness/scoring/failure_mode.py`](../harness/scoring/failure_mode.py), shipped 2026-05-21) and validates 23/23 historical runs against the manual taxonomy in §3.4. The empirical evidence supporting the taxonomy comes from the same v0 smoke runs.
 
 ## 2. Motivation
 
@@ -59,7 +60,7 @@ Task 03's score of 102 is the cleanest example of why a "failure mode" label is 
 
 ### 2.3 Empirical Pattern: Bimodal Failure Duration
 
-The (now N=22) smoke runs reveal a striking bimodal distribution in failure timing:
+The (now N=23) smoke runs reveal a striking bimodal distribution in failure timing:
 
 ```
 0─5s  ─────────────────────────────────  806s (timeout limit varies)
@@ -148,7 +149,7 @@ constructive_rate: 0.74           # = P(complete + partial_complete + wrong_arti
 
 ### 3.3 Implementation Notes
 
-A new module `harness/scoring/failure_mode.py` would classify each `ToolOutput` according to §3.1. Inputs available today:
+The module [`harness/scoring/failure_mode.py`](../harness/scoring/failure_mode.py) classifies each `ToolOutput` according to §3.1. Inputs:
 
 - `tool_output.completion_status` — coarse: complete / partial / failed / timeout / refused
 - `tool_output.wall_clock_seconds`
@@ -174,7 +175,7 @@ The cycle aggregator (`harness/analysis/aggregation.py`) gains a method to compu
 
 ### 3.4 Worked Examples From v0 Smoke Data
 
-Applying the taxonomy retroactively to all 22 runs collected 2026-05-19 to 2026-05-21:
+Applying the taxonomy retroactively to all 23 runs collected 2026-05-19 to 2026-05-21:
 
 | Run | Wall clock | Exit | Files | NI | Classified mode |
 |---|---|---|---|---|---|

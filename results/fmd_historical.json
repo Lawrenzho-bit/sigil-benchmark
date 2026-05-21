@@ -1,0 +1,469 @@
+{
+  "generated_at": "2026-05-21",
+  "rfc": "RFC 0004",
+  "n_runs": 23,
+  "n_conditions": 12,
+  "per_run": [
+    {
+      "run_id": "T01-terse-run1",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 466.0,
+      "files": 42,
+      "label": "complete",
+      "reasoning": "42 files produced, doc_ratio=0.02, completion_status=complete"
+    },
+    {
+      "run_id": "T01-terse-run2",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 33.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=33.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-terse-run3",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 48.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=48.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-terse-run4",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 52.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=52.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-terse-NI-run1",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": true,
+      "wall_clock_seconds": 39.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=39.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-terse-NI-run2",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": true,
+      "wall_clock_seconds": 44.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=44.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-verbose",
+      "task": "task_01_b2b_portal",
+      "variant": "verbose",
+      "ni_applied": false,
+      "wall_clock_seconds": 45.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=45.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-verbose-NI",
+      "task": "task_01_b2b_portal",
+      "variant": "verbose",
+      "ni_applied": true,
+      "wall_clock_seconds": 39.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=39.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-casual",
+      "task": "task_01_b2b_portal",
+      "variant": "casual",
+      "ni_applied": false,
+      "wall_clock_seconds": 41.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=41.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T01-casual-NI",
+      "task": "task_01_b2b_portal",
+      "variant": "casual",
+      "ni_applied": true,
+      "wall_clock_seconds": 551.0,
+      "files": 39,
+      "label": "complete",
+      "reasoning": "39 files produced, doc_ratio=0.00, completion_status=complete"
+    },
+    {
+      "run_id": "T02-terse-attempt1",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 54.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=54.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T02-terse-attempt2",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 108.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=108.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T02-terse-attempt3",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 806.0,
+      "files": 0,
+      "label": "attempted_abort",
+      "reasoning": "long run (806.0s) + 0 files + non-zero exit (1) \u2014 tool attempted but couldn't complete"
+    },
+    {
+      "run_id": "T02-terse-NI",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": true,
+      "wall_clock_seconds": 549.0,
+      "files": 36,
+      "label": "complete",
+      "reasoning": "36 files produced, doc_ratio=0.00, completion_status=complete"
+    },
+    {
+      "run_id": "T03-terse-run1",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 149.0,
+      "files": 1,
+      "label": "wrong_artifact",
+      "reasoning": "1 file(s) produced, doc_ratio=1.00 \u2014 output is documentation/specs rather than executable code"
+    },
+    {
+      "run_id": "T03-terse-run2",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 63.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=63.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T03-terse-NI",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": true,
+      "wall_clock_seconds": 535.0,
+      "files": 35,
+      "label": "complete",
+      "reasoning": "35 files produced, doc_ratio=0.00, completion_status=complete"
+    },
+    {
+      "run_id": "T04-terse-run1",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 1246.0,
+      "files": 40,
+      "label": "complete",
+      "reasoning": "40 files produced, doc_ratio=0.12, completion_status=complete"
+    },
+    {
+      "run_id": "T04-terse-run2",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 30.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=30.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T04-terse-run3",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 23.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=23.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T04-terse-run4",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": false,
+      "wall_clock_seconds": 30.0,
+      "files": 0,
+      "label": "silent_decline",
+      "reasoning": "0 files, exit=0, wall_clock=30.0s \u2014 tool exited without producing output and without explicit refusal"
+    },
+    {
+      "run_id": "T04-terse-NI-run1",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": true,
+      "wall_clock_seconds": 633.0,
+      "files": 66,
+      "label": "complete",
+      "reasoning": "66 files produced, doc_ratio=0.02, completion_status=complete"
+    },
+    {
+      "run_id": "T04-terse-NI-run2",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": true,
+      "wall_clock_seconds": 568.0,
+      "files": 28,
+      "label": "complete",
+      "reasoning": "28 files produced, doc_ratio=0.04, completion_status=complete"
+    }
+  ],
+  "per_condition_fmd": [
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "casual",
+      "ni_applied": false,
+      "n": 1,
+      "completion_rate": 0.0,
+      "constructive_rate": 0.0,
+      "dominant_failure_mode": "silent_decline",
+      "fmd": {
+        "complete": 0.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 1.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "casual",
+      "ni_applied": true,
+      "n": 1,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "dominant_failure_mode": null,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": false,
+      "n": 4,
+      "completion_rate": 0.25,
+      "constructive_rate": 0.25,
+      "dominant_failure_mode": "silent_decline",
+      "fmd": {
+        "complete": 0.25,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.75,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 2,
+      "completion_rate": 0.0,
+      "constructive_rate": 0.0,
+      "dominant_failure_mode": "silent_decline",
+      "fmd": {
+        "complete": 0.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 1.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "verbose",
+      "ni_applied": false,
+      "n": 1,
+      "completion_rate": 0.0,
+      "constructive_rate": 0.0,
+      "dominant_failure_mode": "silent_decline",
+      "fmd": {
+        "complete": 0.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 1.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "verbose",
+      "ni_applied": true,
+      "n": 1,
+      "completion_rate": 0.0,
+      "constructive_rate": 0.0,
+      "dominant_failure_mode": "silent_decline",
+      "fmd": {
+        "complete": 0.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 1.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": false,
+      "n": 3,
+      "completion_rate": 0.0,
+      "constructive_rate": 0.0,
+      "dominant_failure_mode": "silent_decline",
+      "fmd": {
+        "complete": 0.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.6666666666666666,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.3333333333333333,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 1,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "dominant_failure_mode": null,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": false,
+      "n": 2,
+      "completion_rate": 0.0,
+      "constructive_rate": 0.5,
+      "dominant_failure_mode": "wrong_artifact",
+      "fmd": {
+        "complete": 0.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.5,
+        "silent_decline": 0.5,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 1,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "dominant_failure_mode": null,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": false,
+      "n": 4,
+      "completion_rate": 0.25,
+      "constructive_rate": 0.25,
+      "dominant_failure_mode": "silent_decline",
+      "fmd": {
+        "complete": 0.25,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.75,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 2,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "dominant_failure_mode": null,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      }
+    }
+  ],
+  "validation_mismatches": []
+}
