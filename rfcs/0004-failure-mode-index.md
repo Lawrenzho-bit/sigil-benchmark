@@ -106,7 +106,7 @@ Each run is classified into exactly one mode. Detection criteria are determinist
 | **Silent decline** | `silent_decline` | Wall clock < 120s AND 0 files AND exit 0 AND no explicit refusal phrase | T01 verbose, T01 casual, T02-1, T02-2 |
 | **Hard refusal** | `hard_refusal` | Stdout contains explicit refusal phrase ("I can't help with...", "I won't...", etc.) | (no v0 example) |
 | **Attempted abort** | `attempted_abort` | Wall clock ≥ 300s AND 0 files AND exit ≠ 0 | T02 attempt 3 |
-| **Timeout** | `timeout` | Wall clock ≥ configured timeout limit (currently 1800s default) | (no v0 example) |
+| **Timeout** | `timeout` | Wall clock ≥ configured timeout limit AND `0 files produced` (tool was hung / stream-idle) | (no v0 example with 0 files) |
 
 #### Classification precedence (when multiple criteria match)
 
@@ -317,6 +317,25 @@ What it is: SRR and FMD become aspects of one "Behavior Track" metric set.
 
 What it is: Don't ship FMD with v0.5 (Quality); ship in v0.6 alongside Spec-Integrity.
 **Rejected.** FMD has no dependency on v0.6's Spec-Integrity work. The empirical motivation (today's 7 smoke runs) exists now. Deferring delays a methodology improvement that costs almost nothing to implement.
+
+## 5.5 Known Taxonomy Gap: harness_truncated (added 2026-05-21)
+
+The 2026-05-21 cycle surfaced a case the seven-mode taxonomy doesn't cleanly handle: a tool that was actively producing files when the *harness's* configured timeout fired and killed the subprocess. Multiple runs in the cycle produced 30-77 useful files, reached the smoke harness's 3600s `--timeout` cap, and were killed mid-stream. The classifier originally labeled these `timeout`; per REVIEW_2026-05-21.md fix #2 the `timeout` criterion has been tightened to require `0 files produced` so these now correctly fall through to `partial_complete`.
+
+This works as a stopgap but conflates two different things under `partial_complete`:
+- "Tool finished naturally with too few files" (the original meaning)
+- "Tool would have kept going but harness killed it" (the new case)
+
+A future RFC patch should add an 8th mode `harness_truncated`:
+- Wall clock at/near configured timeout
+- AND files >= 1 (some output preserved)
+- AND tool process was killed by SIGKILL/equivalent (not natural exit)
+
+The distinction matters for tool evaluation:
+- `partial_complete` (natural) suggests the tool ran out of ideas
+- `harness_truncated` suggests the tool was capable but ran out of clock
+
+For the v0 cycle, all such cases are reported as `partial_complete` with a footnote.
 
 ## 6. Unresolved Questions
 
