@@ -196,7 +196,7 @@ Particularly valuable contributions at this stage:
 
 - Implementing deployment-dependent sub-components (load tests, OWASP probes, functional compliance verification)
 - Adding tool adapters for new AI codegen tools
-- Specifying remaining 6 tasks (Tasks 5-10)
+- Specifying remaining 5 tasks (Tasks 6-10; T05 specified 2026-05-21)
 - Validation studies (concurrent validity vs expert ratings, real-world incident correlation)
 - Standardized integration mocks (email, payment, SSO, storage, webhook)
 
