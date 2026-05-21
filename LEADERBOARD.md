@@ -292,7 +292,7 @@ Notable weaknesses:
 | Requirement | Status |
 |---|---|
 | N=50 runs per condition | ⚠ Partial (N≤4 per condition; T01-terse no-NI=4, T04-terse no-NI=4, T04-terse +NI=3) |
-| 3 prompt variants per task | ⚠ Partial (T01 tested all three; T02/T03/T04 terse only) |
+| 3 prompt variants per task | ⚠ Partial — T01 has all three variants spec'd + tested; T02/T03/T04/T05 have only terse. This is a known methodology debt per [REVIEW_2026-05-21.md](REVIEW_2026-05-21.md) fix #4: per the Task 01 prompt-variant sensitivity finding, prompt-style is first-order signal that should be tested across all tasks, but the v0 cycle didn't honor that consistently. Future cycles should either backfill verbose+casual variants for T02-T05 or commit to terse-only across all 10 tasks with the variant test as a separate validation cycle. |
 | Test-retest reliability data | ⚠ Partial (T04 +NI N=3: PRS 150/162/164, mean 159, range 14; T01 casual / T02 / T03 +NI all N=2 with ~10-14 point PRS spreads) |
 | Configuration disclosure (e.g. NI suffix) | ✅ Enforced via `non_interactive_suffix_applied` in scoring.json |
 | PRS-Autonomous + PRS-Reviewed modes | ❌ Autonomous only |
