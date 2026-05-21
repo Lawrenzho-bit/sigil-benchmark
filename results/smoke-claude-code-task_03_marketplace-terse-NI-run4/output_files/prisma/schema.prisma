@@ -1,0 +1,561 @@
+// Marketplace platform — data model.
+// Covers all 12 product domains. Money is stored as integer minor units
+// (e.g. cents) in a fixed currency per row to avoid floating-point drift.
+
+generator client {
+  provider = "prisma-client-js"
+  // fullTextSearch powers the `search` filter used by GET /api/search.
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// 1. Accounts & identity
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  BUYER
+  SELLER // a user with an active SellerProfile; can still buy
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED // moderation / fraud hold
+  DELETED   // GDPR erasure: PII scrubbed, row retained for financial records
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  emailVerified Boolean   @default(false)
+  // Null when the account is OAuth-only. Argon2id hash otherwise.
+  passwordHash String?
+  role         UserRole   @default(BUYER)
+  status       UserStatus @default(ACTIVE)
+  displayName  String
+  locale       String     @default("en")
+  countryCode  String     @default("DE") // ISO-3166-1 alpha-2
+
+  oauthAccounts OAuthAccount[]
+  sessions      Session[]
+  sellerProfile SellerProfile?
+  addresses     Address[]
+  listings      Listing[]      @relation("SellerListings")
+  cart          Cart?
+  buyerOrders   Order[]        @relation("BuyerOrders")
+  reviewsWritten Review[]      @relation("ReviewAuthor")
+  reviewsReceived Review[]     @relation("ReviewSubject")
+  messagesSent  Message[]
+  disputesOpened Dispute[]     @relation("DisputeOpener")
+  adminActions  AdminAction[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status])
+}
+
+model OAuthAccount {
+  id             String @id @default(cuid())
+  provider       String // "google", "apple", ...
+  providerUserId String
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  createdAt      DateTime @default(now())
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+}
+
+// Refresh-token sessions. Access tokens are short-lived JWTs and not stored.
+model Session {
+  id               String   @id @default(cuid())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  refreshTokenHash String   @unique // sha-256 of the opaque refresh token
+  userAgent        String?
+  ip               String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Address {
+  id          String  @id @default(cuid())
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  label       String  @default("default")
+  line1       String
+  line2       String?
+  city        String
+  region      String?
+  postalCode  String
+  countryCode String
+  isDefault   Boolean @default(false)
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// 2. Seller onboarding & KYC
+// ---------------------------------------------------------------------------
+
+enum SellerStatus {
+  PENDING_KYC   // profile created, verification not complete
+  ACTIVE        // KYC passed, Stripe account ready, may list & be paid
+  RESTRICTED    // can sell existing listings but not create new ones
+  SUSPENDED     // fraud / DSA action: listings hidden, payouts frozen
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model SellerProfile {
+  id              String       @id @default(cuid())
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String       @unique
+  legalName       String
+  businessType    String       @default("individual") // individual | company
+  status          SellerStatus @default(PENDING_KYC)
+
+  // Stripe Connect express account; payouts route through here.
+  stripeAccountId String?      @unique
+  payoutsEnabled  Boolean      @default(false)
+
+  kyc             KycVerification?
+  bankAccount     BankAccount?
+  payouts         Payout[]
+  defaultTaxRegion String?     // sets facilitator tax obligations
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model KycVerification {
+  id            String        @id @default(cuid())
+  seller        SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId      String        @unique
+  status        KycStatus     @default(NOT_STARTED)
+  provider      String        @default("stripe_identity")
+  providerRef   String?       // verification session id at the provider
+  // Decision detail; never store raw identity documents in our DB.
+  rejectionReason String?
+  verifiedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model BankAccount {
+  id             String        @id @default(cuid())
+  seller         SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId       String        @unique
+  // Tokenised at Stripe — we keep only display metadata, never the full number.
+  stripeBankToken String
+  last4          String
+  bankName       String?
+  countryCode    String
+  currency       String
+  verified       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// 3. Catalog: categories & listings
+// ---------------------------------------------------------------------------
+
+model Category {
+  id       String     @id @default(cuid())
+  slug     String     @unique
+  name     String
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  parentId String?
+  children Category[] @relation("CategoryTree")
+  listings Listing[]
+
+  @@index([parentId])
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  SOLD_OUT
+  REMOVED // moderation removal; kept for audit/DSA transparency
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  seller      User          @relation("SellerListings", fields: [sellerId], references: [id])
+  sellerId    String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  title       String
+  description String
+  status      ListingStatus @default(DRAFT)
+
+  priceAmount Int    // minor units
+  currency    String @default("EUR")
+  inventory   Int    @default(0)
+
+  // Denormalised location for "browse by location" filtering.
+  locationCity    String?
+  locationCountry String?
+  latitude        Float?
+  longitude       Float?
+
+  // Denormalised aggregates kept current on review write — cheap reads at scale.
+  ratingAvg   Float @default(0)
+  ratingCount Int   @default(0)
+
+  photos     ListingPhoto[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  flags      ModerationFlag[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  publishedAt DateTime?
+
+  @@index([status, categoryId])
+  @@index([sellerId])
+  @@index([priceAmount])
+  @@index([locationCountry, locationCity])
+  // Full-text search is added in a migration:
+  //   CREATE INDEX listing_fts ON "Listing"
+  //   USING GIN (to_tsvector('simple', title || ' ' || description));
+}
+
+model ListingPhoto {
+  id        String  @id @default(cuid())
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  // S3 object key; public URL derived via S3_PUBLIC_BASE_URL.
+  objectKey String
+  position  Int     @default(0)
+  width     Int?
+  height    Int?
+
+  @@index([listingId])
+}
+
+// ---------------------------------------------------------------------------
+// 4. Cart & checkout
+// ---------------------------------------------------------------------------
+
+model Cart {
+  id        String     @id @default(cuid())
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String     @unique
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  quantity  Int     @default(1)
+
+  @@unique([cartId, listingId])
+}
+
+// ---------------------------------------------------------------------------
+// 5. Orders & payments
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  FULFILLING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+// One buyer checkout. Because a cart can span multiple sellers, each Order is
+// scoped to a SINGLE seller (the checkout splits the cart into per-seller
+// orders), which keeps Stripe Connect transfers and payouts clean.
+model Order {
+  id          String      @id @default(cuid())
+  buyer       User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  buyerId     String
+  sellerId    String      // denormalised: the seller User id for this order
+  status      OrderStatus @default(PENDING_PAYMENT)
+
+  currency       String
+  subtotalAmount Int  // sum of line items, minor units
+  taxAmount      Int  @default(0)
+  platformFee    Int  @default(0) // marketplace fee withheld from seller
+  totalAmount    Int  // what the buyer pays = subtotal + tax
+
+  shippingAddressId String?
+
+  items    OrderItem[]
+  payment  Payment?
+  review   Review?
+  dispute  Dispute?
+  taxRecord TaxRecord?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  paidAt    DateTime?
+  deliveredAt DateTime?
+
+  @@index([buyerId, status])
+  @@index([sellerId, status])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  listing     Listing @relation(fields: [listingId], references: [id])
+  listingId   String
+  // Price/title snapshotted at purchase time — listings mutate later.
+  titleSnapshot String
+  unitAmount  Int
+  quantity    Int
+
+  @@index([orderId])
+}
+
+enum PaymentStatus {
+  REQUIRES_ACTION
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  order                 Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId               String        @unique
+  status                PaymentStatus @default(REQUIRES_ACTION)
+  // Stripe PaymentIntent with transfer_data to the seller's connected account.
+  stripePaymentIntentId String?       @unique
+  stripeChargeId        String?
+  amount                Int
+  currency              String
+  refundedAmount        Int           @default(0)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// 6. Payouts
+// ---------------------------------------------------------------------------
+
+enum PayoutStatus {
+  SCHEDULED
+  PROCESSING
+  PAID
+  FAILED
+}
+
+// Weekly aggregate payout to a seller: sum of delivered-order net proceeds
+// (subtotal − platform fee − refunds) for the payout period.
+model Payout {
+  id           String        @id @default(cuid())
+  seller       SellerProfile @relation(fields: [sellerId], references: [id])
+  sellerId     String
+  status       PayoutStatus  @default(SCHEDULED)
+  currency     String
+  grossAmount  Int           // sum of order subtotals in period
+  feeAmount    Int           // platform fees withheld
+  netAmount    Int           // actually transferred
+  periodStart  DateTime
+  periodEnd    DateTime
+  stripeTransferId String?   @unique
+  failureReason String?
+  createdAt    DateTime      @default(now())
+  paidAt       DateTime?
+
+  @@index([sellerId, status])
+}
+
+// ---------------------------------------------------------------------------
+// 7. Reviews & ratings
+// ---------------------------------------------------------------------------
+
+// Buyer reviews the seller, allowed only after the order is DELIVERED.
+model Review {
+  id        String @id @default(cuid())
+  order     Order  @relation(fields: [orderId], references: [id])
+  orderId   String @unique // one review per order
+  author    User   @relation("ReviewAuthor", fields: [authorId], references: [id])
+  authorId  String
+  subject   User   @relation("ReviewSubject", fields: [subjectId], references: [id])
+  subjectId String // the seller
+  rating    Int    // 1..5
+  body      String?
+  sellerReply String?
+  createdAt DateTime @default(now())
+
+  @@index([subjectId])
+}
+
+// ---------------------------------------------------------------------------
+// 8. Messaging
+// ---------------------------------------------------------------------------
+
+model Conversation {
+  id        String    @id @default(cuid())
+  buyerId   String
+  sellerId  String
+  listingId String?   // optional context
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([buyerId, sellerId, listingId])
+  @@index([sellerId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  sender         User         @relation(fields: [senderId], references: [id])
+  senderId       String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+}
+
+// ---------------------------------------------------------------------------
+// 9. Dispute resolution
+// ---------------------------------------------------------------------------
+
+enum DisputeStatus {
+  OPEN
+  AWAITING_SELLER
+  AWAITING_BUYER
+  ESCALATED      // handed to admin
+  RESOLVED_REFUND
+  RESOLVED_RELEASE // funds released to seller
+  CLOSED
+}
+
+model Dispute {
+  id        String        @id @default(cuid())
+  order     Order         @relation(fields: [orderId], references: [id])
+  orderId   String        @unique
+  opener    User          @relation("DisputeOpener", fields: [openerId], references: [id])
+  openerId  String
+  status    DisputeStatus @default(OPEN)
+  reason    String
+  resolutionNote String?
+  messages  DisputeMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  resolvedAt DateTime?
+
+  @@index([status])
+}
+
+model DisputeMessage {
+  id        String   @id @default(cuid())
+  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  disputeId String
+  senderId  String
+  body      String
+  // True for admin/internal notes not shown to the parties.
+  internal  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([disputeId])
+}
+
+// ---------------------------------------------------------------------------
+// 10. Tax (marketplace facilitator)
+// ---------------------------------------------------------------------------
+
+// Per-order tax snapshot. The platform is the deemed supplier (facilitator)
+// for VAT/GST in most EU jurisdictions, so tax is collected at checkout and
+// remitted by the platform, not the seller.
+model TaxRecord {
+  id            String   @id @default(cuid())
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId       String   @unique
+  jurisdiction  String   // e.g. "DE", "FR"
+  taxType       String   // "VAT" | "GST"
+  ratePpm       Int      // rate in parts-per-million (190000 = 19%)
+  taxableAmount Int
+  taxAmount     Int
+  facilitator   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([jurisdiction, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// 11. Moderation, fraud & admin (DSA)
+// ---------------------------------------------------------------------------
+
+enum FlagStatus {
+  OPEN
+  REVIEWING
+  ACTIONED
+  DISMISSED
+}
+
+// DSA Article 16 "notice and action": user/automated reports against listings.
+model ModerationFlag {
+  id         String     @id @default(cuid())
+  listing    Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId  String
+  reporterId String?    // null = automated/system flag
+  reason     String
+  detail     String?
+  status     FlagStatus @default(OPEN)
+  // DSA statement-of-reasons text given to the seller on ACTIONED.
+  statementOfReasons String?
+  createdAt  DateTime   @default(now())
+  resolvedAt DateTime?
+
+  @@index([status])
+}
+
+// Append-only audit log of every privileged admin action.
+model AdminAction {
+  id          String   @id @default(cuid())
+  admin       User     @relation(fields: [adminId], references: [id])
+  adminId     String
+  action      String   // "suspend_seller", "remove_listing", "resolve_dispute", ...
+  targetType  String
+  targetId    String
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([targetType, targetId])
+}
+
+// Inbox/outbox pattern for reliable Stripe webhook + side-effect processing.
+model WebhookEvent {
+  id          String   @id // provider event id — dedupe key
+  provider    String   @default("stripe")
+  type        String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+}

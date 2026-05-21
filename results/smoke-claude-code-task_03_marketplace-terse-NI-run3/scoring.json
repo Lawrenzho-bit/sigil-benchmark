@@ -1,0 +1,398 @@
+{
+  "tool_id": "claude-code",
+  "task_id": "task_03_marketplace",
+  "variant": "terse",
+  "mode": "prs_autonomous",
+  "non_interactive_suffix_applied": true,
+  "generation_wall_clock_seconds": 30268.25,
+  "scoring_wall_clock_seconds": 2.514999999999418,
+  "completion_status": "partial",
+  "refusal_reason": "Exceeded 3600s timeout; 77 partial files preserved",
+  "files_produced": 77,
+  "failure_mode": {
+    "label": "timeout",
+    "reasoning": "wall_clock 3600.0s at/near configured timeout 3600.0s",
+    "file_count": 77,
+    "doc_ratio": 0.012987012987012988,
+    "wall_clock_seconds": 3600.0,
+    "returncode": -1
+  },
+  "composite_prs": 163.0,
+  "dimensions": {
+    "security": {
+      "score": 20.0,
+      "sub_components": [
+        {
+          "id": "sec_01_static_analysis",
+          "name": "Static analysis findings",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "semgrep"
+        },
+        {
+          "id": "sec_02_dependency_cves",
+          "name": "Dependency CVE count",
+          "score": 10.0,
+          "rubric": "0 high/critical CVEs",
+          "tool_used": "npm_audit_unavailable"
+        },
+        {
+          "id": "sec_08_secret_management",
+          "name": "Secret management",
+          "score": 10.0,
+          "rubric": "All secrets in env/secret-manager",
+          "tool_used": "regex_fallback"
+        },
+        {
+          "id": "sec_03_auth_correctness",
+          "name": "Authentication correctness (OWASP ASVS L1)",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "owasp_asvs_l1_suite"
+        },
+        {
+          "id": "sec_04_input_validation",
+          "name": "Input validation coverage",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "harness_probe"
+        },
+        {
+          "id": "sec_05_sqli_resistance",
+          "name": "SQL injection resistance",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "owasp_zap+sqlmap"
+        },
+        {
+          "id": "sec_06_xss_prevention",
+          "name": "XSS prevention",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "owasp_zap"
+        },
+        {
+          "id": "sec_07_csrf_protection",
+          "name": "CSRF protection",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "harness_probe"
+        },
+        {
+          "id": "sec_09_tls_config",
+          "name": "TLS/HTTPS configuration",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "testssl_sh"
+        },
+        {
+          "id": "sec_10_rate_limiting",
+          "name": "Rate limiting",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "harness_probe"
+        }
+      ]
+    },
+    "production_ops": {
+      "score": 22.0,
+      "sub_components": [
+        {
+          "id": "ops_02_observability",
+          "name": "Observability",
+          "score": 4.0,
+          "rubric": "Unstructured logs",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "ops_03_health_checks",
+          "name": "Health checks",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "ops_04_backup_strategy",
+          "name": "Backup strategy",
+          "score": 6.0,
+          "rubric": "Manual backup process documented",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "ops_05_db_pooling",
+          "name": "DB connection pooling",
+          "score": 6.0,
+          "rubric": "Default pool used",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "ops_07_cache_strategy",
+          "name": "Cache strategy",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "ops_09_deployment_automation",
+          "name": "Deployment automation",
+          "score": 0.0,
+          "rubric": "Nothing",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "ops_10_time_correctness",
+          "name": "Time correctness",
+          "score": 6.0,
+          "rubric": "UTC storage only",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "ops_01_error_handling",
+          "name": "Error handling (fuzz testing)",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "harness_fuzzer"
+        },
+        {
+          "id": "ops_06_n_plus_one",
+          "name": "N+1 query detection",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "query_analyzer"
+        },
+        {
+          "id": "ops_08_graceful_degradation",
+          "name": "Graceful degradation",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "chaos_test"
+        }
+      ]
+    },
+    "scalability": {
+      "score": 54.0,
+      "sub_components": [
+        {
+          "id": "scale_03_async_processing",
+          "name": "Async processing",
+          "score": 10.0,
+          "rubric": "Queue + workers for all >500ms ops",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "scale_04_background_jobs",
+          "name": "Background job system",
+          "score": 6.0,
+          "rubric": "Simple queue",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "scale_05_read_replica",
+          "name": "Read replica support",
+          "score": 6.0,
+          "rubric": "Possible with minor refactor",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "scale_06_stateless",
+          "name": "Stateless architecture",
+          "score": 10.0,
+          "rubric": "No local state, session in store",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "scale_07_container_readiness",
+          "name": "Container readiness",
+          "score": 10.0,
+          "rubric": "Dockerfile + 12-factor compliance",
+          "tool_used": "static_file_analysis"
+        },
+        {
+          "id": "scale_08_autoscaling",
+          "name": "Auto-scaling config",
+          "score": 2.0,
+          "rubric": "Possible but unconfigured",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "scale_09_cdn",
+          "name": "CDN configuration",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "scale_10_db_indexing",
+          "name": "Database indexing",
+          "score": 10.0,
+          "rubric": "Indexes on all queried columns",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "scale_01_load_1k",
+          "name": "Load test 1k concurrent",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "k6_load_test"
+        },
+        {
+          "id": "scale_02_load_10k",
+          "name": "Load test 10k concurrent",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "k6_load_test"
+        }
+      ]
+    },
+    "compliance": {
+      "score": 19.0,
+      "sub_components": [
+        {
+          "id": "comp_01_cookie_consent",
+          "name": "GDPR cookie consent",
+          "score": 5.0,
+          "rubric": "P=2/3 F=1/4 D=2/3",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "comp_02_privacy_policy",
+          "name": "Privacy policy",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_file_analysis"
+        },
+        {
+          "id": "comp_03_terms_of_service",
+          "name": "Terms of service",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_file_analysis"
+        },
+        {
+          "id": "comp_04_data_export",
+          "name": "Data export endpoint",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "comp_05_data_deletion",
+          "name": "Data deletion endpoint",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "comp_06_audit_logging",
+          "name": "Audit logging",
+          "score": 10.0,
+          "rubric": "All sensitive actions + immutable + actor/action recorded",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "comp_07_access_controls",
+          "name": "Access controls",
+          "score": 4.0,
+          "rubric": "Simple roles",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "comp_08_encryption_at_rest",
+          "name": "Encryption at rest",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "comp_09_dpa_template",
+          "name": "DPA template",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_file_analysis"
+        },
+        {
+          "id": "comp_10_eu_ai_act",
+          "name": "EU AI Act provenance disclosure",
+          "score": 0.0,
+          "rubric": "None",
+          "tool_used": "static_pattern_analysis"
+        }
+      ]
+    },
+    "cost_efficiency": {
+      "score": 48.0,
+      "sub_components": [
+        {
+          "id": "cost_04_vendor_lockin",
+          "name": "Vendor lock-in",
+          "score": 10.0,
+          "rubric": "100% OSS or open standards",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "cost_05_multicloud_portability",
+          "name": "Multi-cloud portability",
+          "score": 10.0,
+          "rubric": "Same image runs on 5+ platforms",
+          "tool_used": "static_file_analysis"
+        },
+        {
+          "id": "cost_06_oss_ratio",
+          "name": "OSS dependency ratio",
+          "score": 10.0,
+          "rubric": "100% OSS",
+          "tool_used": "dependency_analyzer_npm"
+        },
+        {
+          "id": "cost_07_egress_optimization",
+          "name": "Egress cost optimization",
+          "score": 4.0,
+          "rubric": "1",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "cost_08_auto_shutdown",
+          "name": "Auto-shutdown",
+          "score": 6.0,
+          "rubric": "Possible with extra work",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "cost_09_right_sizing",
+          "name": "Resource right-sizing",
+          "score": 6.0,
+          "rubric": "Mostly OK (defaults)",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "cost_10_pricing_predictability",
+          "name": "Pricing model predictability",
+          "score": 2.0,
+          "rubric": "Hard to predict (egress-heavy)",
+          "tool_used": "static_pattern_analysis"
+        },
+        {
+          "id": "cost_01_cost_100",
+          "name": "Cost @ 100 users",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "deployment_cost_monitor"
+        },
+        {
+          "id": "cost_02_cost_10k",
+          "name": "Cost @ 10k users",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "deployment_cost_monitor"
+        },
+        {
+          "id": "cost_03_cost_100k",
+          "name": "Cost @ 100k users",
+          "score": 0.0,
+          "rubric": null,
+          "tool_used": "deployment_cost_monitor"
+        }
+      ]
+    }
+  }
+}

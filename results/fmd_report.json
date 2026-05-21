@@ -1,0 +1,386 @@
+{
+  "generated_at": "2026-05-21",
+  "n_runs": 17,
+  "n_conditions": 8,
+  "skipped_dirs": [],
+  "per_run": [
+    {
+      "result_dir": "smoke-claude-code-task_01_b2b_portal-casual-NI-run1",
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "casual",
+      "ni_applied": true,
+      "run_num": 1,
+      "files": 39,
+      "prs": 167.0,
+      "wall_clock_seconds": 551.0,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_01_b2b_portal-casual-NI-run2",
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "casual",
+      "ni_applied": true,
+      "run_num": 2,
+      "files": 29,
+      "prs": 181.0,
+      "wall_clock_seconds": 2375.202999999994,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_01_b2b_portal-terse",
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": false,
+      "run_num": 1,
+      "files": 42,
+      "prs": 155.0,
+      "wall_clock_seconds": 465.875,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_01_b2b_portal-terse-NI-run3",
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 3,
+      "files": 77,
+      "prs": 218.0,
+      "wall_clock_seconds": 32553.76599999999,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_02_admin_tool-terse-NI-run1",
+      "tool": "claude-code",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 1,
+      "files": 36,
+      "prs": 156.0,
+      "wall_clock_seconds": 548.9380000000019,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_02_admin_tool-terse-NI-run2",
+      "tool": "claude-code",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 2,
+      "files": 17,
+      "prs": 128.0,
+      "wall_clock_seconds": 32084.0,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_02_admin_tool-terse-NI-run3",
+      "tool": "claude-code",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 3,
+      "files": 26,
+      "prs": 146.0,
+      "wall_clock_seconds": 2369.7339999999967,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_02_admin_tool-terse-NI-run4",
+      "tool": "claude-code",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 4,
+      "files": 0,
+      "prs": null,
+      "wall_clock_seconds": 29525.092999999993,
+      "label": "timeout"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_03_marketplace-terse",
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": false,
+      "run_num": 1,
+      "files": 1,
+      "prs": 102.0,
+      "wall_clock_seconds": 149.25,
+      "label": "wrong_artifact"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_03_marketplace-terse-NI-run1",
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 1,
+      "files": 35,
+      "prs": 138.0,
+      "wall_clock_seconds": 534.8600000000006,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_03_marketplace-terse-NI-run2",
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 2,
+      "files": 25,
+      "prs": 152.0,
+      "wall_clock_seconds": 2378.7820000000065,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_03_marketplace-terse-NI-run3",
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 3,
+      "files": 77,
+      "prs": 163.0,
+      "wall_clock_seconds": 30268.25,
+      "label": "partial_complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_03_marketplace-terse-NI-run4",
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 4,
+      "files": 39,
+      "prs": 198.0,
+      "wall_clock_seconds": 30209.093999999997,
+      "label": "partial_complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_04_support-terse",
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": false,
+      "run_num": 1,
+      "files": 40,
+      "prs": 156.0,
+      "wall_clock_seconds": 1246.047,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_04_support-terse-NI-run1",
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 1,
+      "files": 66,
+      "prs": 162.0,
+      "wall_clock_seconds": 633.0619999999981,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_04_support-terse-NI-run2",
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 2,
+      "files": 28,
+      "prs": 164.0,
+      "wall_clock_seconds": 567.5,
+      "label": "complete"
+    },
+    {
+      "result_dir": "smoke-claude-code-task_04_support-terse-NI-run3",
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": true,
+      "run_num": 3,
+      "files": 19,
+      "prs": 150.0,
+      "wall_clock_seconds": 2373.625,
+      "label": "complete"
+    }
+  ],
+  "per_condition_fmd": [
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "casual",
+      "ni_applied": true,
+      "n": 2,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      },
+      "prs_when_complete": [
+        167.0,
+        181.0
+      ]
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": false,
+      "n": 1,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      },
+      "prs_when_complete": [
+        155.0
+      ]
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_01_b2b_portal",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 1,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      },
+      "prs_when_complete": [
+        218.0
+      ]
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_02_admin_tool",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 4,
+      "completion_rate": 0.75,
+      "constructive_rate": 0.75,
+      "fmd": {
+        "complete": 0.75,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.25
+      },
+      "prs_when_complete": [
+        156.0,
+        128.0,
+        146.0
+      ]
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": false,
+      "n": 1,
+      "completion_rate": 0.0,
+      "constructive_rate": 1.0,
+      "fmd": {
+        "complete": 0.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 1.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      },
+      "prs_when_complete": []
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_03_marketplace",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 4,
+      "completion_rate": 0.5,
+      "constructive_rate": 1.0,
+      "fmd": {
+        "complete": 0.5,
+        "partial_complete": 0.5,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      },
+      "prs_when_complete": [
+        138.0,
+        152.0
+      ]
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": false,
+      "n": 1,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      },
+      "prs_when_complete": [
+        156.0
+      ]
+    },
+    {
+      "tool": "claude-code",
+      "task": "task_04_support",
+      "variant": "terse",
+      "ni_applied": true,
+      "n": 3,
+      "completion_rate": 1.0,
+      "constructive_rate": 1.0,
+      "fmd": {
+        "complete": 1.0,
+        "partial_complete": 0.0,
+        "wrong_artifact": 0.0,
+        "silent_decline": 0.0,
+        "hard_refusal": 0.0,
+        "attempted_abort": 0.0,
+        "timeout": 0.0
+      },
+      "prs_when_complete": [
+        162.0,
+        164.0,
+        150.0
+      ]
+    }
+  ]
+}

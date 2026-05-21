@@ -48,6 +48,8 @@ Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent s
 | 03 — Marketplace (terse) | no-NI | — | — | — | — | — | — | — | 0 | 63s | 2 | silent_decline |
 | 03 — Marketplace (terse) | +NI | **138.0** | 20 | 20 | 48 | 10 | 40 | **62** | 35 | 8m 55s | 1 | complete |
 | 03 — Marketplace (terse) | +NI | **152.0** | 20 | 28 | 48 | 16 | 40 | **58** | 25 | 39m 39s | 2 | complete |
+| 03 — Marketplace (terse) | +NI | **163.0** | 20 | 30 | 48 | 22 | 43 | **62** | 77 | 60m (timeout-killed) | 3 | partial_complete |
+| 03 — Marketplace (terse) | +NI | **198.0** | 20 | 38 | 56 | 28 | 56 | **64** | 39 | 60m (timeout-killed) | 4 | partial_complete |
 | 04 — Customer Support (terse) | no-NI | **156.0** | 18 | 26 | 42 | 16 | 54 | **60** | 40 | 20m 46s | 1 | complete |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 30s | 2 | silent_decline |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 23s | 3 | silent_decline |
@@ -87,7 +89,7 @@ The 23 runs above, classified per the [RFC 0004](rfcs/0004-failure-mode-index.md
 | claude-code | T02 admin_tool | terse | no | 3 | 0% | 0% | silent_decline (1× attempted_abort) |
 | claude-code | T02 admin_tool | terse | yes | 1 | **100%** | 100% | — |
 | claude-code | T03 marketplace | terse | no | 2 | 0% | 50% | wrong_artifact |
-| claude-code | T03 marketplace | terse | yes | 1 | **100%** | 100% | — |
+| claude-code | T03 marketplace | terse | yes | 4 | 50% | 100% | partial_complete (2 runs hit 60m timeout but scored PRS 163/198) |
 | claude-code | T04 support | terse | no | 4 | 25% | 25% | silent_decline |
 | claude-code | T04 support | terse | yes | 2 | **100%** | 100% | — |
 
