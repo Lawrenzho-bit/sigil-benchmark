@@ -57,6 +57,7 @@ Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent s
 | 04 — Customer Support (terse) | +NI | **162.0** | 20 | 34 | 38 | 18 | 52 | **68** | 66 | 10m 33s | 1 | complete |
 | 04 — Customer Support (terse) | +NI | **164.0** | 20 | 18 | 38 | 36 | 52 | **56** | 28 | 9m 28s | 2 | complete |
 | 04 — Customer Support (terse) | +NI | **150.0** | 20 | 22 | 38 | 18 | 52 | **70** | 19 | 39m 34s | 3 | complete |
+| 04 — Customer Support (terse) | +NI | **204.0** ← 2nd high | 20 | 28 | 56 | 40 | 60 | **70** | 50 | 60m (timeout-killed) | 4 | partial_complete |
 
 \* **Quality** is a v0.5-candidate 6th dimension ([RFC 0001](rfcs/0001-add-quality-dimension.md), see also [METHODOLOGY §16.6](METHODOLOGY.md#166-v05-candidate-maintainabilityquality-as-6th-dimension)). Not included in composite PRS. **The Quality dimension does diagnostic work the existing 5 dimensions miss most starkly on T03**: the doc-only run scored Quality=0 (composite PRS=102); the real-code +NI run scored Quality=62 (composite PRS=138). PRS v0.4's 36-point gap between the false-positive and the real codebase becomes a 62-point gap when Quality is included. This is the cleanest empirical case for shipping RFC 0001 in v0.5.
 
@@ -91,7 +92,7 @@ The 23 runs above, classified per the [RFC 0004](rfcs/0004-failure-mode-index.md
 | claude-code | T03 marketplace | terse | no | 2 | 0% | 50% | wrong_artifact |
 | claude-code | T03 marketplace | terse | yes | 4 | 50% | 100% | partial_complete (2 runs hit 60m timeout but scored PRS 163/198) |
 | claude-code | T04 support | terse | no | 4 | 25% | 25% | silent_decline |
-| claude-code | T04 support | terse | yes | 2 | **100%** | 100% | — |
+| claude-code | T04 support | terse | yes | 4 | 75% | 100% | partial_complete (run 4 hit 60m timeout but scored PRS 204, 2nd-highest in cycle) |
 
 **Aggregate read** (updated 2026-05-21 with later data): across the 12 conditions, completion rate is **0%** in 6 conditions, **25%-33%** in 3, and **100%** in 5 (excluding the partially-run T02 +NI which is at 75% after timeout in run 4). The all-or-nothing pattern is the dominant shape but not absolute — T01 terse +NI moved from 0% (N=2) to 33% (N=3) when the third run unexpectedly produced a 77-file build with PRS 218 (the highest score in the cycle). This argues against a strict discrete "ask vs build" internal state and toward a probabilistic distribution where some prompt/task combinations have much lower P(build) than others, but never zero. N=2 is unsafe; even N=3 can change the qualitative picture.
 

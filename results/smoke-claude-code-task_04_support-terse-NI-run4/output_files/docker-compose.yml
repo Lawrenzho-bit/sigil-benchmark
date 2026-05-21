@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: support
+      POSTGRES_PASSWORD: support
+      POSTGRES_DB: support
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U support"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Dev SMTP sink — catches all outbound mail; UI on :8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://support:support@db:5432/support
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      JWT_SECRET: dev-only-secret-change-in-prod
+      PUBLIC_BASE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    # Apply migrations, then boot the API + SLA monitor.
+    command: sh -c "npm run migrate && node dist/index.js"
+
+  # Background worker: SLA breach detection + GDPR retention purge
+  worker:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://support:support@db:5432/support
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+    command: node dist/jobs/slaMonitor.js --daemon
+
+volumes:
+  pgdata:
