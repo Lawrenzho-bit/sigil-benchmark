@@ -45,7 +45,31 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--variant", default="terse", choices=("terse", "verbose", "casual"))
     parser.add_argument("--timeout", type=int, default=3600, help="Max seconds for claude -p")
     parser.add_argument("--out-dir", default=None, help="Override output directory")
+    parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help=(
+            "Append tasks/shared/non_interactive_suffix.md to the prompt. "
+            "Recommended for benchmarking agentic tools in -p / batch mode "
+            "(without it, claude-code etc. often respond conversationally and "
+            "ask for confirmation before writing files; the session ends and "
+            "no files are produced). See LEADERBOARD.md 2026-05-21 finding."
+        ),
+    )
     return parser.parse_args()
+
+
+def _load_non_interactive_suffix() -> str:
+    """Extract the verbatim appendable text from the shared suffix file."""
+    suffix_path = REPO_ROOT / "tasks" / "shared" / "non_interactive_suffix.md"
+    if not suffix_path.exists():
+        raise FileNotFoundError(f"Non-interactive suffix file missing: {suffix_path}")
+    text = suffix_path.read_text(encoding="utf-8")
+    marker = "appended to the prompt after a blank line and `---`)\n\n"
+    idx = text.find(marker)
+    if idx < 0:
+        raise ValueError("Non-interactive suffix file is missing the verbatim marker")
+    return text[idx + len(marker):].strip()
 
 
 async def smoke() -> None:
@@ -69,6 +93,9 @@ async def smoke() -> None:
         console.print(f"[red]Prompt variant not available: {prompt_path}[/red]")
         sys.exit(2)
     prompt = prompt_path.read_text(encoding="utf-8")
+    if args.non_interactive:
+        suffix = _load_non_interactive_suffix()
+        prompt = f"{prompt.rstrip()}\n\n---\n\n{suffix}\n"
     acceptance_path = task_dir / "acceptance_criteria.md"
     acceptance = acceptance_path.read_text(encoding="utf-8") if acceptance_path.exists() else ""
 
@@ -192,6 +219,7 @@ async def smoke() -> None:
         "task_id": task.task_id,
         "variant": args.variant,
         "mode": "prs_autonomous",
+        "non_interactive_suffix_applied": args.non_interactive,
         "generation_wall_clock_seconds": gen_elapsed,
         "scoring_wall_clock_seconds": scoring_elapsed,
         "completion_status": tool_output.completion_status,
