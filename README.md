@@ -41,20 +41,31 @@ We hope it can eventually be governed by an independent body; see [Governance](#
 
 ## Status
 
-**v0 scaffold** — this is an early, working reference implementation. Not yet ready for publication as an official Sigil Index cycle.
+**v0.4.1 scaffold + early empirical data** — methodology is peer-review grade; reference implementation is working; first preliminary smoke runs across 4 tasks have been collected and published.
 
 | Component | Status |
 |---|---|
 | 5-dimension methodology (v0.4) | ✅ Complete, peer-review grade |
+| Maintainability/Quality dimension (v0.5 candidate, [RFC 0001](rfcs/0001-add-quality-dimension.md)) | ✅ Reference implementation; 8 codebases scored |
+| Failure Mode Distribution ([RFC 0004](rfcs/0004-failure-mode-index.md)) | ✅ Reference implementation; validates 23/23 historical runs |
 | Benchmark harness (Python) | ✅ Working |
 | Tool adapters (Claude Code, Anthropic API, OpenAI API, manual) | ✅ Working |
 | 32 of 50 sub-components implemented | ✅ Static analysis |
 | 18 deployment-dependent sub-components | 🚧 Require live deployment + probes |
 | Statistical analysis (bootstrap CIs, BH correction, rank stability) | ✅ Working |
 | Demo pipeline (`scripts/demo_pipeline.py`) | ✅ Runs end-to-end with mock data |
+| Non-interactive batch protocol ([`tasks/shared/non_interactive_suffix.md`](tasks/shared/non_interactive_suffix.md)) | ✅ Versioned, opt-in via `--non-interactive` |
+| Diagnostic tooling (`scripts/diag_claude_silent_decline.py`) | ✅ Root-causes silent declines in <1 minute |
 | Real benchmark cycle (Sigil Index Q1+) | 📋 Not yet run |
 
-A first real preliminary cycle has been recorded against `claude-code` on Task 01 (B2B SaaS portal). See **[LEADERBOARD.md](LEADERBOARD.md)**.
+**23 preliminary `claude-code` smoke runs** across 4 tasks have been collected and published, surfacing several methodology findings already documented on the leaderboard:
+
+- The **Non-Interactive Suffix Discovery** — that agentic CLI tools in `-p` mode routinely refuse conversationally, destroying single-run reproducibility (the original "PRS 155" was a stochastic exception, not the modal behavior)
+- **T03 false positive caught**: PRS 102 (1-file doc-only) vs PRS 138 (35-file real codebase) → Quality dimension widens the gap to 62 points, demonstrating that v0.5 catches a class of false positive v0.4 over-rewards
+- **T04 test-retest within 2 PRS points** (162 vs 164) — early evidence that PRS converges at coarse grain across stochastic verbosity
+- **All-or-nothing completion pattern** across 12 conditions — 7 at 0% completion, 5 at 100%, 2 at 25% — points to a discrete internal state in claude-code's agentic mode
+
+See **[LEADERBOARD.md](LEADERBOARD.md)** for the full data and findings.
 
 ## Quickstart
 
@@ -66,8 +77,16 @@ pip install -e .
 # Run the demo with mock data (no API keys needed)
 python scripts/demo_pipeline.py
 
-# Run against Claude Code (requires `claude` CLI authenticated)
-python scripts/smoke_claude_code.py
+# Run against Claude Code (requires `claude` CLI authenticated).
+# --non-interactive is recommended for batch use: see LEADERBOARD.md
+# "Non-Interactive Suffix Discovery" finding.
+python scripts/smoke_claude_code.py --non-interactive
+
+# Re-classify past runs under the RFC 0004 Failure Mode taxonomy
+python scripts/classify_historical_runs.py
+
+# Re-score past runs on the v0.5 Quality dimension (RFC 0001)
+python scripts/rescore_quality.py
 ```
 
 Detailed setup: **[docs/getting_started.md](docs/getting_started.md)**.
