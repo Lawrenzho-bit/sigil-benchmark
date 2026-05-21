@@ -90,55 +90,38 @@ def _load_run(result_dir: Path, meta: dict) -> dict | None:
     if scoring_path.exists():
         data = json.loads(scoring_path.read_text(encoding="utf-8"))
         # Reconstruct a ToolOutput-like for classification if `failure_mode` missing
-        if "failure_mode" in data and isinstance(data["failure_mode"], dict):
-            fm = data["failure_mode"]
-            label = fm.get("label", "complete")
-            # Edge case: a run that hit the wall-clock timeout AFTER producing
-            # substantial scored output is more usefully labeled partial_complete
-            # (value was delivered) than timeout (nothing happened). RFC 0004
-            # §3.1 has strict precedence putting timeout above partial_complete;
-            # this is a report-level override for the common "wrote 77 files,
-            # then got killed at 3600s, scored PRS 163" case.
-            if (
-                label == "timeout"
-                and data.get("composite_prs") is not None
-                and data.get("files_produced", 0) >= 5
-            ):
-                label = "partial_complete"
-        else:
-            # If a composite PRS was successfully computed AND >=5 files were
-            # produced, the run definitively completed (timeout / silent_decline
-            # / refused etc. would all have prevented scoring from running).
-            # This is the strongest possible signal — bypass the classifier.
-            files_dir = result_dir / "output_files"
-            file_dict = (
-                {
-                    p.relative_to(files_dir).as_posix(): ""
-                    for p in files_dir.rglob("*")
-                    if p.is_file()
-                }
-                if files_dir.exists()
-                else {}
-            )
-            if data.get("composite_prs") is not None and len(file_dict) >= 5:
-                label = "complete"
-            else:
-                # Fall back to the classifier with whatever data we have
-                tool_output = ToolOutput(
-                    tool_id=data.get("tool_id", "unknown"),
-                    model="unknown",
-                    mode="prs_autonomous",
-                    prompt="(reconstruction)",
-                    output_files=file_dict,
-                    completion_status=data.get("completion_status", "complete"),
-                    refusal_reason=data.get("refusal_reason"),
-                    wall_clock_seconds=data.get("generation_wall_clock_seconds"),
-                    raw_response={"returncode": 0, "stdout_tail": "", "stderr_tail": ""},
-                )
-                result = classify_failure_mode(
-                    tool_output, configured_timeout_seconds=3600.0
-                )
-                label = result.label.value
+        # Always reclassify from disk using the current classifier code.
+        # We do NOT trust the failure_mode field that was stored at run
+        # time, because classifier criteria evolve (e.g., the 2026-05-21
+        # criterion update that requires file_count==0 for timeout makes
+        # the older stored "timeout" labels obsolete for runs with files).
+        # The stored field is forensic record; this report is for
+        # current analysis using the current criteria.
+        files_dir = result_dir / "output_files"
+        file_dict = (
+            {
+                p.relative_to(files_dir).as_posix(): ""
+                for p in files_dir.rglob("*")
+                if p.is_file()
+            }
+            if files_dir.exists()
+            else {}
+        )
+        tool_output = ToolOutput(
+            tool_id=data.get("tool_id", "unknown"),
+            model="unknown",
+            mode="prs_autonomous",
+            prompt="(reconstruction)",
+            output_files=file_dict,
+            completion_status=data.get("completion_status", "complete"),
+            refusal_reason=data.get("refusal_reason"),
+            wall_clock_seconds=data.get("generation_wall_clock_seconds"),
+            raw_response={"returncode": 0, "stdout_tail": "", "stderr_tail": ""},
+        )
+        result = classify_failure_mode(
+            tool_output, configured_timeout_seconds=3600.0
+        )
+        label = result.label.value
         return {
             "result_dir": result_dir.name,
             "tool": meta["tool"],

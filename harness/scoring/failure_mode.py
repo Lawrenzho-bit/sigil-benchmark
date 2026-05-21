@@ -153,15 +153,23 @@ def classify_failure_mode(
             **base_fields,
         )
 
-    # 2. timeout
+    # 2. timeout — wall_clock at/near configured cap AND no files produced.
+    #    The "AND no files" guard distinguishes "tool hung doing nothing" from
+    #    "tool was producing output at the moment the harness killed it"
+    #    (the latter is partial_complete per the wrong-artifact-bypassed path
+    #    below). Without this guard, the classifier mislabels productive-but-
+    #    killed runs as timeout — and inflated wall_clock measurements from the
+    #    Windows `time.monotonic()` bug (documented in CHANGELOG v0.4.1) make
+    #    that misclassification very common in practice.
     if (
         configured_timeout_seconds is not None
         and wall_clock is not None
         and wall_clock >= configured_timeout_seconds * TIMEOUT_PROXIMITY_RATIO
+        and file_count == 0
     ):
         return FailureModeResult(
             label=FailureModeLabel.timeout,
-            reasoning=f"wall_clock {wall_clock:.1f}s at/near configured timeout {configured_timeout_seconds:.1f}s",
+            reasoning=f"wall_clock {wall_clock:.1f}s at/near configured timeout {configured_timeout_seconds:.1f}s with 0 files",
             **base_fields,
         )
 
@@ -204,27 +212,35 @@ def classify_failure_mode(
                 **base_fields,
             )
 
-        # 4. complete — successful build with enough code
-        if (
-            file_count >= min_files_for_complete
-            and tool_output.completion_status == "complete"
-        ):
+        # 4. complete — successful build with enough code.
+        #    NOTE: we do NOT require completion_status == "complete" because
+        #    the smoke harness's coarse completion_status is set to "failed"
+        #    whenever the CLI exits non-zero, even when files were produced
+        #    and scored successfully (e.g., MCP server cleanup crash after
+        #    file writes finished). The presence of >= min_files_for_complete
+        #    files that aren't documentation is itself sufficient signal of
+        #    completion. If a stricter "did the user get what they asked for"
+        #    test is needed, that belongs in acceptance-criteria checking,
+        #    not in the categorical failure-mode taxonomy.
+        if file_count >= min_files_for_complete:
             return FailureModeResult(
                 label=FailureModeLabel.complete,
                 reasoning=(
-                    f"{file_count} files produced, doc_ratio={doc_ratio:.2f}, "
-                    "completion_status=complete"
+                    f"{file_count} files produced, doc_ratio={doc_ratio:.2f}"
+                    + (
+                        f", completion_status={tool_output.completion_status!r}"
+                        if tool_output.completion_status != "complete"
+                        else ""
+                    )
                 ),
                 **base_fields,
             )
 
-        # 6. partial_complete — files produced but criteria not met
+        # 6. partial_complete — files produced but below threshold
         return FailureModeResult(
             label=FailureModeLabel.partial_complete,
             reasoning=(
-                f"{file_count} file(s) produced but completion_status="
-                f"{tool_output.completion_status!r} or below threshold "
-                f"({min_files_for_complete})"
+                f"{file_count} file(s) produced (< {min_files_for_complete} threshold)"
             ),
             **base_fields,
         )
