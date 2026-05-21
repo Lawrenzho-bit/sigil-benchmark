@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Inbox — Helpdesk</title>
+  <link rel="stylesheet" href="/static/portal.css">
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Helpdesk · Agent</span>
+    <span class="user">{{ user.name }} · {{ user.role.value }}</span>
+  </header>
+  <main class="container">
+    <h1>Inbox</h1>
+    <form method="get" action="/agent/inbox" class="filters">
+      <input name="q" placeholder="search tickets…" value="{{ q or '' }}">
+      <select name="status">
+        <option value="">any status</option>
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      <select name="assignee">
+        <option value="">any assignee</option>
+        <option value="me" {% if assignee == 'me' %}selected{% endif %}>me</option>
+        <option value="unassigned" {% if assignee == 'unassigned' %}selected{% endif %}>unassigned</option>
+      </select>
+      <button class="btn-primary" type="submit">Filter</button>
+    </form>
+
+    <table class="tickets">
+      <thead><tr><th>#</th><th>Subject</th><th>Customer</th><th>Status</th><th>Priority</th><th>FR due</th></tr></thead>
+      <tbody>
+      {% for t in tickets %}
+        <tr>
+          <td><a href="/agent/tickets/{{ t.id }}">#{{ t.number }}</a></td>
+          <td>{{ t.subject }}</td>
+          <td>{{ t.customer.email if t.customer else '-' }}</td>
+          <td><span class="status status-{{ t.status.value }}">{{ t.status.value }}</span></td>
+          <td>{{ t.priority.value }}</td>
+          <td>{{ t.first_response_due_at.strftime("%Y-%m-%d %H:%M") if t.first_response_due_at else '-' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

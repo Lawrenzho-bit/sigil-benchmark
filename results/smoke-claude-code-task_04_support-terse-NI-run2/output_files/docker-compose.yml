@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: support
+      POSTGRES_PASSWORD: support
+      POSTGRES_DB: support_desk
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U support"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    command: node dist/server.js
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+  worker-sla:
+    build: .
+    command: node dist/workers/sla-monitor.js
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker-email:
+    build: .
+    command: node dist/workers/email-poller.js
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker-csat:
+    build: .
+    command: node dist/workers/csat-sender.js
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

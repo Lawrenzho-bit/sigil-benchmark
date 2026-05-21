@@ -1,0 +1,34 @@
+{% extends "portal/base.html" %}
+{% block title %}Your tickets{% endblock %}
+{% block content %}
+<h1>Your tickets</h1>
+
+<details open>
+  <summary>New ticket</summary>
+  <form method="post" action="/portal/tickets" class="card">
+    <label>Subject <input type="text" name="subject" required maxlength="500"></label>
+    <label>Describe your issue
+      <textarea name="body" rows="8" required></textarea>
+    </label>
+    <button class="btn-primary" type="submit">Submit</button>
+  </form>
+</details>
+
+{% if tickets %}
+<table class="tickets">
+  <thead><tr><th>#</th><th>Subject</th><th>Status</th><th>Updated</th></tr></thead>
+  <tbody>
+  {% for t in tickets %}
+    <tr>
+      <td><a href="/portal/tickets/{{ t.id }}">#{{ t.number }}</a></td>
+      <td>{{ t.subject }}</td>
+      <td><span class="status status-{{ t.status.value }}">{{ t.status.value }}</span></td>
+      <td>{{ t.updated_at.strftime("%Y-%m-%d %H:%M") }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>You haven't filed any tickets yet.</p>
+{% endif %}
+{% endblock %}

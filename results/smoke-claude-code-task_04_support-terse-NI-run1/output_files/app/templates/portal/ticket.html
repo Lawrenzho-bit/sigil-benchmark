@@ -1,0 +1,29 @@
+{% extends "portal/base.html" %}
+{% block title %}#{{ ticket.number }} — {{ ticket.subject }}{% endblock %}
+{% block content %}
+<p><a href="/">&larr; All tickets</a></p>
+
+<h1>#{{ ticket.number }} — {{ ticket.subject }}</h1>
+<p>Status: <span class="status status-{{ ticket.status.value }}">{{ ticket.status.value }}</span></p>
+
+<ul class="thread">
+{% for m in messages %}
+  <li class="msg msg-{{ m.kind.value }}">
+    <header>
+      <strong>{% if m.kind.value == 'customer_reply' %}You{% else %}Support{% endif %}</strong>
+      <time>{{ m.created_at.strftime("%Y-%m-%d %H:%M") }}</time>
+    </header>
+    <div class="body">{{ m.body_text }}</div>
+  </li>
+{% endfor %}
+</ul>
+
+{% if ticket.status.value not in ['closed', 'merged'] %}
+<form method="post" action="/portal/tickets/{{ ticket.id }}/reply" class="card">
+  <label>Reply
+    <textarea name="body" rows="6" required></textarea>
+  </label>
+  <button class="btn-primary" type="submit">Send reply</button>
+</form>
+{% endif %}
+{% endblock %}
