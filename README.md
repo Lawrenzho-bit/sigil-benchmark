@@ -99,7 +99,7 @@ Detailed setup: **[docs/getting_started.md](docs/getting_started.md)**.
 - **AI-Involvement Spectrum**: Tools classified into 6 positions (Suggestive → Augmentative → Conversational → Agentic → End-to-End → Composed). Cross-position comparisons explicitly caveated.
 - **Anti-gaming**: 30% held-out test set, annual task rotation, anti-training detection, methodology audit requirements for high-scoring tools.
 - **Validity studies**: Test-retest reliability, concurrent validity (vs expert ratings), discriminant validity, longitudinal real-world correlation study.
-- **Pre-registration**: Task selection and analysis plan pre-registered on [OSF.io](https://osf.io/) before each cycle.
+- **Pre-registration**: Task selection and analysis plan pre-registered on [OSF.io](https://osf.io/) before each cycle. Fillable template at [`templates/osf_pre_registration.md`](templates/osf_pre_registration.md).
 
 See **[METHODOLOGY.md](METHODOLOGY.md)** for the full specification.
 

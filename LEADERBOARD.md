@@ -238,7 +238,7 @@ Notable weaknesses:
 | Safety Refusal Rate (SRR) | ❌ Not tested |
 | Bootstrap percentile CIs | ❌ Insufficient N |
 | Benjamini-Hochberg correction | ❌ No multi-comparison |
-| Pre-registration on OSF | ❌ Not pre-registered |
+| Pre-registration on OSF | ⚠ Template ready ([`templates/osf_pre_registration.md`](templates/osf_pre_registration.md)); not yet executed for an official cycle |
 | 10 tasks | ❌ 4 tasks specified |
 | 30% held-out test set | ❌ All test cases public |
 | Multiple tools | ❌ Single tool (claude-code only) |
