@@ -29,6 +29,7 @@ from harness.deployment.base import DeploymentResult
 from harness.orchestrator import TaskDefinition
 from harness.scoring.compliance import ComplianceScoringEngine
 from harness.scoring.cost_efficiency import CostEfficiencyScoringEngine
+from harness.scoring.failure_mode import classify_failure_mode
 from harness.scoring.production_ops import ProductionOpsScoringEngine
 from harness.scoring.scalability import ScalabilityScoringEngine
 from harness.scoring.security import SecurityScoringEngine
@@ -127,6 +128,17 @@ async def smoke() -> None:
     if tool_output.refusal_reason:
         console.print(f"  Refusal reason: {tool_output.refusal_reason}")
 
+    # Classify the run per RFC 0004 failure-mode taxonomy
+    fmd_result = classify_failure_mode(
+        tool_output,
+        configured_timeout_seconds=float(args.timeout),
+        min_files_for_complete=5,
+    )
+    console.print(
+        f"  Failure mode (RFC 0004): [bold cyan]{fmd_result.label.value}[/bold cyan] "
+        f"[dim]({fmd_result.reasoning})[/dim]"
+    )
+
     if tool_output.output_files:
         # Show first 15 file names
         sample_files = sorted(tool_output.output_files.keys())[:15]
@@ -138,7 +150,24 @@ async def smoke() -> None:
             console.print(f"  ... and {len(tool_output.output_files) - 15} more")
 
     if not tool_output.output_files:
-        console.print("[red]No files produced — cannot score.[/red]")
+        # Save a minimal forensic record so 0-file runs aren't lost
+        run_label = f"smoke-claude-code-{args.task}-{args.variant}"
+        results_dir = REPO_ROOT / "results" / (args.out_dir or run_label)
+        results_dir.mkdir(parents=True, exist_ok=True)
+        forensic = {
+            "tool_id": adapter.tool_id,
+            "task_id": task.task_id,
+            "variant": args.variant,
+            "non_interactive_suffix_applied": args.non_interactive,
+            "generation_wall_clock_seconds": gen_elapsed,
+            "completion_status": tool_output.completion_status,
+            "refusal_reason": tool_output.refusal_reason,
+            "files_produced": 0,
+            "failure_mode": fmd_result.to_dict(),
+            "raw_response": tool_output.raw_response,
+        }
+        (results_dir / "failure_record.json").write_text(json.dumps(forensic, indent=2))
+        console.print(f"[red]No files produced — cannot score.[/red] [dim](forensic record at {results_dir / 'failure_record.json'})[/dim]")
         return
 
     # SAVE OUTPUTS IMMEDIATELY so we don't lose Claude's work if scoring crashes
@@ -225,6 +254,7 @@ async def smoke() -> None:
         "completion_status": tool_output.completion_status,
         "refusal_reason": tool_output.refusal_reason,
         "files_produced": len(tool_output.output_files),
+        "failure_mode": fmd_result.to_dict(),
         "composite_prs": composite,
         "dimensions": {
             dim_id: {
