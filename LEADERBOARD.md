@@ -14,20 +14,42 @@ Do not cite as authoritative.
 
 ---
 
-## Preliminary Scores — claude-code (Claude Code CLI v2.1.144)
+## Preliminary Scores — claude-code (Claude Code CLI v2.1.144 / v2.1.145)
 
-Generated 2026-05-19 to 2026-05-20. Static analysis only (deployment-dependent sub-components stubbed and return 0). PRS-Autonomous mode (no human review).
+Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent sub-components stubbed and return 0). PRS-Autonomous mode (no human review).
 
-| Task | Composite PRS | Sec | Ops | Scale | Comp | Cost | Quality (v0.5)* | Files | Wall clock | Status |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 01 — B2B SaaS Portal (terse) | **155.0** | 20 | 22 | 42 | 23 | 48 | **68** | 42 | 7m 46s | complete |
-| 01 — B2B SaaS Portal (verbose) | — | — | — | — | — | — | — | 0 | 45s | **partial** (see note) |
-| 01 — B2B SaaS Portal (casual) | — | — | — | — | — | — | — | 0 | 41s | **partial** (see note) |
-| 02 — Internal Admin Tool (terse) | — | — | — | — | — | — | — | 0 | 54s + 108s + 806s | **failed** (see note) |
-| 03 — Marketplace (terse) | **102.0** | 20 | 12 | 34 | 12 | 24 | **0** | 1 | 2m 29s | partial (1 file) |
-| 04 — Customer Support (terse) | **156.0** | 18 | 26 | 42 | 16 | 54 | **60** | 40 | 20m 46s | complete |
+**Two configurations are reported:**
 
-\* **Quality** is a v0.5-candidate 6th dimension (see [METHODOLOGY §16.6](METHODOLOGY.md#166-v05-candidate-maintainabilityquality-as-6th-dimension)). Not included in composite PRS. Note that T03's Quality=0 correctly exposes the "documentation-only" output that the other dimensions partially missed.
+- **no-NI** — prompt run as written, no execution instruction appended. Reflects the variant's behavior on agentic claude-code at default settings.
+- **+NI** — prompt run with `tasks/shared/non_interactive_suffix.md` appended (the `--non-interactive` smoke-script flag). Recommended for batch benchmarking; see the "Non-Interactive Suffix Discovery" methodology finding below.
+
+| Task / Variant | Cfg | PRS | Sec | Ops | Scale | Comp | Cost | Quality* | Files | Wall clock | Run | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 01 — B2B Portal (terse) | no-NI | **155.0** | 20 | 22 | 42 | 23 | 48 | **68** | 42 | 7m 46s | 1 | complete |
+| 01 — B2B Portal (terse) | no-NI | — | — | — | — | — | — | — | 0 | 33s | 2 | silent_decline |
+| 01 — B2B Portal (terse) | no-NI | — | — | — | — | — | — | — | 0 | 48s | 3 | silent_decline |
+| 01 — B2B Portal (terse) | no-NI | — | — | — | — | — | — | — | 0 | 52s | 4 | silent_decline |
+| 01 — B2B Portal (terse) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
+| 01 — B2B Portal (terse) | +NI | — | — | — | — | — | — | — | 0 | 44s | 2 | silent_decline |
+| 01 — B2B Portal (verbose) | no-NI | — | — | — | — | — | — | — | 0 | 45s | 1 | silent_decline |
+| 01 — B2B Portal (verbose) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
+| 01 — B2B Portal (casual) | no-NI | — | — | — | — | — | — | — | 0 | 41s | 1 | silent_decline |
+| 01 — B2B Portal (casual) | +NI | **167.0** | 18 | 22 | 56 | 21 | 50 | TBD | 39 | 9m 11s | 1 | complete |
+| 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 54s | 1 | silent_decline |
+| 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 108s | 2 | silent_decline |
+| 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 806s | 3 | attempted_abort (exit 1) |
+| 02 — Admin Tool (terse) | +NI | **156.0** | 20 | 30 | 32 | 18 | 56 | TBD | 36 | 9m 09s | 1 | complete |
+| 03 — Marketplace (terse) | no-NI | **102.0** | 20 | 12 | 34 | 12 | 24 | **0** | 1 | 2m 29s | 1 | wrong_artifact (docs only) |
+| 03 — Marketplace (terse) | no-NI | — | — | — | — | — | — | — | 0 | 63s | 2 | silent_decline |
+| 03 — Marketplace (terse) | +NI | **138.0** | 20 | 20 | 48 | 10 | 40 | TBD | 35 | 8m 55s | 1 | complete |
+| 04 — Customer Support (terse) | no-NI | **156.0** | 18 | 26 | 42 | 16 | 54 | **60** | 40 | 20m 46s | 1 | complete |
+| 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 30s | 2 | silent_decline |
+| 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 23s | 3 | silent_decline |
+| 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 30s | 4 | silent_decline |
+| 04 — Customer Support (terse) | +NI | **162.0** | 20 | 34 | 38 | 18 | 52 | TBD | 66 | 10m 33s | 1 | complete |
+| 04 — Customer Support (terse) | +NI | **164.0** | 20 | 18 | 38 | 36 | 52 | TBD | 28 | 9m 28s | 2 | complete |
+
+\* **Quality** is a v0.5-candidate 6th dimension (see [METHODOLOGY §16.6](METHODOLOGY.md#166-v05-candidate-maintainabilityquality-as-6th-dimension)). Not included in composite PRS. Rescoring on the new +NI codebases is pending (TBD).
 
 ### Notable cross-task observations
 
@@ -42,6 +64,49 @@ Generated 2026-05-19 to 2026-05-20. Static analysis only (deployment-dependent s
 - Observability: limited beyond `console.log` / `print()` in most outputs
 - Stateless architecture: mixed — Task 04 hit 10/10 (Redis session store) but Task 01 hit 4/10
 - Access controls: tasks default to "Admin/user only" rather than granular RBAC
+
+### Non-Interactive Suffix Discovery (Headline Methodology Finding, 2026-05-21)
+
+**The single most important methodology finding from the v0 cycle.** Initial benchmarking showed claude-code achieving PRS 155 on Task 01 (42 files in 7m 46s). Test-retest runs of the *same prompt* produced **zero files in 30-60 seconds** — eight times in a row across Tasks 01/03/04. Root cause:
+
+In non-interactive mode (`claude -p`), claude-code routinely responds *conversationally* — asking 3-4 clarifying questions about stack / SSO provider / deployment target / scope — instead of writing files. The session ends after that single turn. The smoke harness reports the run as "0 files / silent_decline" without surfacing the conversational text.
+
+Confirmed via direct CLI capture (`scripts/diag_claude_silent_decline.py`):
+
+> *"The question prompt was dismissed without a selection, so I'll stop here rather than guess. Let me know which of the four options (or a different scope) you want and I'll proceed."*
+
+This is **correct agentic UX behavior** (asking before scaffolding 30+ files of someone else's code is good!) but it makes benchmark-style non-interactive evaluation produce dramatically misleading single-run numbers. The original PRS 155 was a stochastic exception where claude *happened* to skip the question.
+
+**Fix:** A standardized suffix appended to the prompt for batch use:
+
+> *"IMPORTANT: Begin writing files immediately. Do not ask for confirmation. Use sensible defaults for any ambiguities. Build the complete codebase in the current working directory now."*
+
+Versioned at [`tasks/shared/non_interactive_suffix.md`](tasks/shared/non_interactive_suffix.md). Opt-in via `--non-interactive` on the smoke script; disclosed in `scoring.json` as `non_interactive_suffix_applied`. Updates require an RFC.
+
+**Effect on completion rate:**
+
+| Task / Variant | no-NI complete | +NI complete | Lift |
+|---|---|---|---|
+| T01 terse | 1 of 4 (25%) | 0 of 2 (0%) | **NI did not help** (still asks despite suffix) |
+| T01 verbose | 0 of 1 | 0 of 1 | NI did not help |
+| T01 casual | 0 of 1 | 1 of 1 (100%) | **+100 pp** |
+| T02 terse | 0 of 3 (0%) | 1 of 1 (100%) | **+100 pp** |
+| T03 terse | 1 of 2 (50%, wrong_artifact) | 1 of 1 (100%, real code) | quality lift |
+| T04 terse | 1 of 4 (25%) | 2 of 2 (100%) | **+75 pp** |
+
+**Five observations:**
+
+1. **N=1 benchmarking is dangerously misleading.** The "PRS 155 / 156" headline numbers came from runs that don't reproduce. Real per-prompt completion rates without the suffix are 0-25%, not 100%.
+2. **The suffix works for most prompts, not all.** T01 terse and T01 verbose remain resistant; claude continues to ask for clarification even with the explicit instruction. This is itself first-order signal: tool behavior on the *same task* depends on prompt phrasing in ways no methodology had previously controlled for.
+3. **PRS scores when builds do complete are remarkably stable.** T04 +NI runs 1 and 2 produced PRS 162 and 164 — within 2 points despite file counts varying 2.4× (66 vs 28). PRS converges at coarse grain across stochastic verbosity.
+4. **T02 finally completed.** After 3 prior attempts failed, T02 +NI run 1 produced 36 files with PRS 156 — same score magnitude as T04. The Task 02 Failure Mode finding's "implies pre-existing context" hypothesis is partly vindicated: claude was asking the same clarifying questions on T02 as on T01, the suffix overrode that ambiguity-seeking on T02 but not on T01.
+5. **T03 false positive sharply exposed.** The no-NI T03 run produced 1 doc file scored at PRS 102. The +NI T03 run produced 35 code files scored at PRS 138 — only 36 points higher. PRS v0.4 over-rewarded the doc-only output. The Quality v0.5 dimension (RFC 0001) scored that doc-only file at 0/100, catching it correctly. **This is the cleanest empirical case for shipping RFC 0001.**
+
+**Combined with [RFC 0004 (Failure Mode Distribution)](rfcs/0004-failure-mode-index.md):** the FMD taxonomy now has concrete grounding. Every no-NI run that previously appeared as "PRS ≈ 0" is actually classifiable as `silent_decline` (conversational refusal), `attempted_abort` (T02 attempt 3), or `wrong_artifact` (T03 run 1). RFC 0004's worked examples can be re-grounded in this richer dataset.
+
+**Methodology version impact:** v0.4.1 patch (suffix is opt-in, configuration-disclosed). v0.5 should likely make the suffix the default for batch cycles, with an explicit "ambiguity-sensitivity" track that runs without it as a controlled comparison.
+
+---
 
 ### Task 01 Prompt-Variant Sensitivity (Methodology Finding)
 
@@ -134,8 +199,10 @@ Notable weaknesses:
 
 | Requirement | Status |
 |---|---|
-| N=50 runs per condition | ❌ Single run per task (3 runs only for T02 retry) |
+| N=50 runs per condition | ⚠ Partial (N≤4 per condition; T01-terse and T04-terse no-NI have N=4 each) |
 | 3 prompt variants per task | ⚠ Partial (T01 tested all three; T02/T03/T04 terse only) |
+| Test-retest reliability data | ⚠ Partial (T04 +NI N=2 shows PRS within 2 points; broader N still needed) |
+| Configuration disclosure (e.g. NI suffix) | ✅ Enforced via `non_interactive_suffix_applied` in scoring.json |
 | PRS-Autonomous + PRS-Reviewed modes | ❌ Autonomous only |
 | Safety Refusal Rate (SRR) | ❌ Not tested |
 | Bootstrap percentile CIs | ❌ Insufficient N |
@@ -162,13 +229,17 @@ cd sigil-benchmark
 pip install -e .
 
 # Run against any task (terse | verbose | casual)
-python scripts/smoke_claude_code.py --task task_01_b2b_portal --variant terse
-python scripts/smoke_claude_code.py --task task_04_support --variant terse
+# Recommended for batch/non-interactive use — appends the standardized
+# execution instruction documented in tasks/shared/non_interactive_suffix.md
+python scripts/smoke_claude_code.py --task task_01_b2b_portal --variant terse --non-interactive
+
+# Without --non-interactive, claude-code in -p mode will most often respond
+# conversationally and ask for clarification, producing 0 files. See the
+# "Non-Interactive Suffix Discovery" methodology finding above.
+python scripts/smoke_claude_code.py --task task_04_support --variant terse --non-interactive
 ```
 
-Scores will vary run-to-run (LLM stochasticity). The Task 02 failure and Task 03 minimal-output are real diagnostics; both should reproduce, but with some probability of producing different results across runs.
-
-This is **the reason** N=50 is the methodology requirement.
+Scores will vary run-to-run (LLM stochasticity). Completion is itself stochastic — even with `--non-interactive`, some prompt variants (e.g., T01 terse and verbose) still trigger claude-code's clarification-seeking behavior strongly enough to refuse the run. This is **the reason** N=50 is the methodology requirement.
 
 ---
 
