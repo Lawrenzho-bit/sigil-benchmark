@@ -1,0 +1,243 @@
+// Prisma schema for the SaaS internal admin tool.
+// Postgres-backed. See README.md for the data model overview.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────
+
+enum AdminRole {
+  SUPER_ADMIN
+  ACCOUNT_ADMIN
+  SUPPORT
+  FINANCE
+  READ_ONLY
+}
+
+enum SsoProvider {
+  SAML
+  OIDC
+}
+
+enum ManagedUserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum OrgStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CHURNED
+}
+
+enum ActorType {
+  ADMIN_USER
+  API_TOKEN
+  SYSTEM
+}
+
+enum JobType {
+  CSV_IMPORT
+  CSV_EXPORT
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+enum BroadcastStatus {
+  DRAFT
+  SENT
+}
+
+// ─── Admin (internal) users ────────────────────────────────────────────────
+// These are the operators of this tool. No passwords are ever stored — all
+// authentication is delegated to the corporate IdP via SAML or OIDC.
+
+model AdminUser {
+  id          String      @id @default(cuid())
+  email       String      @unique
+  name        String
+  role        AdminRole   @default(READ_ONLY)
+  ssoProvider SsoProvider?
+  ssoSubject  String?
+  isActive    Boolean     @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  apiTokens   ApiToken[]
+
+  @@index([role])
+}
+
+// ─── Customer organizations (the SaaS company's customers) ─────────────────
+
+model Organization {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  plan      String     @default("free")
+  status    OrgStatus  @default(ACTIVE)
+  seats     Int        @default(0)
+  mrrCents  Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  managedUsers  ManagedUser[]
+  flagOverrides FeatureFlagOverride[]
+
+  @@index([status])
+  @@index([name])
+}
+
+// ─── Managed (end) users belonging to customer orgs ────────────────────────
+
+model ManagedUser {
+  id        String            @id @default(cuid())
+  email     String            @unique
+  name      String
+  status    ManagedUserStatus @default(ACTIVE)
+  orgId     String
+  org       Organization      @relation(fields: [orgId], references: [id])
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([orgId])
+  @@index([status])
+  @@index([name])
+}
+
+// ─── Audit log ─────────────────────────────────────────────────────────────
+// Append-only. Every state-changing admin action writes exactly one row.
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  actorType   ActorType
+  actorId     String?   // AdminUser.id or ApiToken.id; null for SYSTEM
+  actorEmail  String?
+  action      String    // e.g. "user.deactivate", "flag.toggle"
+  targetType  String    // e.g. "ManagedUser", "Organization"
+  targetId    String?
+  summary     String
+  diff        Json?     // { field: { from, to } }
+  metadata    Json?
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([actorId])
+  @@index([targetType, targetId])
+}
+
+// ─── Impersonation sessions ────────────────────────────────────────────────
+
+model ImpersonationSession {
+  id              String    @id @default(cuid())
+  adminId         String
+  adminEmail      String
+  managedUserId   String
+  managedUserEmail String
+  reason          String
+  tokenJti        String    @unique
+  startedAt       DateTime  @default(now())
+  expiresAt       DateTime
+  endedAt         DateTime?
+
+  @@index([adminId])
+  @@index([managedUserId])
+}
+
+// ─── Feature flags ─────────────────────────────────────────────────────────
+
+model FeatureFlag {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  description     String
+  enabledGlobally Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  overrides FeatureFlagOverride[]
+}
+
+model FeatureFlagOverride {
+  id        String       @id @default(cuid())
+  flagId    String
+  flag      FeatureFlag  @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  enabled   Boolean
+  updatedAt DateTime     @updatedAt
+
+  @@unique([flagId, orgId])
+  @@index([orgId])
+}
+
+// ─── Broadcasts / communications ───────────────────────────────────────────
+
+model Broadcast {
+  id             String          @id @default(cuid())
+  subject        String
+  body           String
+  audience       Json            // filter criteria used to resolve recipients
+  recipientCount Int             @default(0)
+  status         BroadcastStatus @default(DRAFT)
+  createdById    String
+  createdByEmail String
+  createdAt      DateTime        @default(now())
+  sentAt         DateTime?
+
+  @@index([createdAt])
+}
+
+// ─── API tokens ────────────────────────────────────────────────────────────
+// Programmatic access. Only a SHA-256 hash of the token is stored.
+
+model ApiToken {
+  id          String    @id @default(cuid())
+  name        String
+  prefix      String    // first chars of the token, shown in the UI
+  tokenHash   String    @unique
+  scopes      String[]  // permission strings this token may exercise
+  createdById String
+  createdBy   AdminUser @relation(fields: [createdById], references: [id])
+  lastUsedAt  DateTime?
+  usageCount  Int       @default(0)
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([createdById])
+}
+
+// ─── Background jobs (CSV import/export) ───────────────────────────────────
+
+model BackgroundJob {
+  id          String    @id @default(cuid())
+  type        JobType
+  status      JobStatus @default(PENDING)
+  createdById String
+  createdByEmail String
+  result      Json?     // summary: counts, per-row errors
+  error       String?
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+}

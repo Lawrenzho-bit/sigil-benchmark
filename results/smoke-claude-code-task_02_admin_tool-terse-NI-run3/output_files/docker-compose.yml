@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: admintool
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d admintool"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      APP_BASE_URL: http://localhost:4000
+      DATABASE_URL: postgresql://admin:admin@db:5432/admintool?schema=public
+      SESSION_SECRET: ${SESSION_SECRET:-dev-only-session-secret-change-me-please-48b}
+      SESSION_TTL_MINUTES: 480
+      BOOTSTRAP_SUPER_ADMINS: ${BOOTSTRAP_SUPER_ADMINS:-admin@example.com}
+      ALLOW_JIT_PROVISIONING: "true"
+      IMPERSONATION_JWT_SECRET: ${IMPERSONATION_JWT_SECRET:-dev-only-impersonation-secret}
+      IMPERSONATION_TOKEN_TTL_MINUTES: 15
+    ports:
+      - "4000:4000"
+
+volumes:
+  db-data:

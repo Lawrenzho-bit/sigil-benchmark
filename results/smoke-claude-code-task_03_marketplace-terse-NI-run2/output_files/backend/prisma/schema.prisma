@@ -1,0 +1,419 @@
+// Marketplace data model. Covers all 12 domains.
+// Money is stored as integer minor units (cents) — never floats.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Accounts
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String? // null when the account is OAuth-only
+  displayName  String
+  status       UserStatus @default(ACTIVE)
+  roles        UserRole[] @default([BUYER])
+  countryCode  String     @default("US") // ISO-3166-1 alpha-2, used for tax
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  oauthAccounts OAuthAccount[]
+  sellerProfile SellerProfile?
+  listings      Listing[]
+  cartItems     CartItem[]
+  ordersBought  Order[]        @relation("BuyerOrders")
+  reviewsWritten Review[]      @relation("ReviewAuthor")
+  messages      Message[]
+  threadsAsBuyer  MessageThread[] @relation("ThreadBuyer")
+  disputesOpened Dispute[]      @relation("DisputeOpener")
+  auditLogs     AuditLog[]
+
+  @@index([status])
+}
+
+model OAuthAccount {
+  id             String @id @default(uuid())
+  userId         String
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       String // "google", "apple", ...
+  providerUserId String
+  createdAt      DateTime @default(now())
+
+  @@unique([provider, providerUserId])
+}
+
+// ---------------------------------------------------------------------------
+// Seller onboarding + KYC
+// ---------------------------------------------------------------------------
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model SellerProfile {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  legalName       String
+  businessName    String?
+  // Stripe Connect account id; payouts are blocked until this is set + KYC verified.
+  stripeAccountId String?
+  kycStatus       KycStatus @default(NOT_STARTED)
+  payoutsEnabled  Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  kycVerification KycVerification?
+  bankAccount     BankAccount?
+  payouts         Payout[]
+}
+
+model KycVerification {
+  id              String    @id @default(uuid())
+  sellerProfileId String    @unique
+  sellerProfile   SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+  provider        String    @default("stub")
+  providerRef     String? // verification session id at the provider
+  status          KycStatus @default(PENDING)
+  rejectionReason String?
+  checkedAt       DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+// Stored as a reference only — raw bank numbers live at the payment provider,
+// never in this database.
+model BankAccount {
+  id              String   @id @default(uuid())
+  sellerProfileId String   @unique
+  sellerProfile   SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+  last4           String
+  bankName        String?
+  currency        String   @default("usd")
+  providerToken   String // token from the payment provider
+  createdAt       DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Catalog: categories + listings
+// ---------------------------------------------------------------------------
+
+model Category {
+  id        String     @id @default(uuid())
+  slug      String     @unique
+  name      String
+  parentId  String?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  listings  Listing[]
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  REMOVED // taken down by moderation
+}
+
+model Listing {
+  id          String        @id @default(uuid())
+  sellerId    String
+  seller      User          @relation(fields: [sellerId], references: [id])
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  title       String
+  description String
+  priceCents  Int
+  currency    String        @default("usd")
+  inventory   Int           @default(0)
+  status      ListingStatus @default(DRAFT)
+  locationCity    String?
+  locationCountry String     @default("US")
+  ratingAvg   Float         @default(0)
+  ratingCount Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  photos     ListingPhoto[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([status, categoryId])
+  @@index([status, priceCents])
+  @@index([sellerId])
+}
+
+model ListingPhoto {
+  id        String  @id @default(uuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  s3Key     String
+  position  Int     @default(0)
+}
+
+// ---------------------------------------------------------------------------
+// Cart
+// ---------------------------------------------------------------------------
+
+model CartItem {
+  id        String  @id @default(uuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  quantity  Int     @default(1)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+}
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  buyerId         String
+  buyer           User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  status          OrderStatus @default(PENDING_PAYMENT)
+  subtotalCents   Int
+  taxCents        Int
+  totalCents      Int
+  currency        String      @default("usd")
+  shipCountry     String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items    OrderItem[]
+  payment  Payment?
+  reviews  Review[]
+  disputes Dispute[]
+
+  @@index([buyerId, status])
+}
+
+// One order can span multiple sellers; each OrderItem is attributed to a seller
+// so payouts and split payments can be computed per seller.
+model OrderItem {
+  id            String  @id @default(uuid())
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listingId     String
+  listing       Listing @relation(fields: [listingId], references: [id])
+  sellerId      String
+  titleSnapshot String
+  unitPriceCents Int
+  quantity      Int
+  taxCents      Int     @default(0)
+
+  @@index([sellerId])
+}
+
+// ---------------------------------------------------------------------------
+// Payments (Stripe Connect)
+// ---------------------------------------------------------------------------
+
+enum PaymentStatus {
+  REQUIRES_ACTION
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  orderId               String        @unique
+  order                 Order         @relation(fields: [orderId], references: [id])
+  stripePaymentIntentId String?
+  status                PaymentStatus @default(PROCESSING)
+  amountCents           Int
+  platformFeeCents      Int
+  currency              String        @default("usd")
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Payouts
+// ---------------------------------------------------------------------------
+
+enum PayoutStatus {
+  SCHEDULED
+  PROCESSING
+  PAID
+  FAILED
+}
+
+model Payout {
+  id              String       @id @default(uuid())
+  sellerProfileId String
+  sellerProfile   SellerProfile @relation(fields: [sellerProfileId], references: [id])
+  periodStart     DateTime
+  periodEnd       DateTime
+  grossCents      Int
+  feeCents        Int
+  netCents        Int
+  currency        String       @default("usd")
+  status          PayoutStatus @default(SCHEDULED)
+  stripeTransferId String?
+  createdAt       DateTime     @default(now())
+
+  @@index([sellerProfileId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+model Review {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  authorId  String
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  sellerId  String // the seller being reviewed
+  rating    Int // 1..5
+  body      String?
+  createdAt DateTime @default(now())
+
+  // A buyer reviews a given seller at most once per order.
+  @@unique([orderId, sellerId])
+  @@index([sellerId])
+}
+
+// ---------------------------------------------------------------------------
+// Messaging
+// ---------------------------------------------------------------------------
+
+model MessageThread {
+  id        String   @id @default(uuid())
+  buyerId   String
+  buyer     User     @relation("ThreadBuyer", fields: [buyerId], references: [id])
+  sellerId  String
+  listingId String?
+  createdAt DateTime @default(now())
+  messages  Message[]
+
+  @@unique([buyerId, sellerId, listingId])
+}
+
+model Message {
+  id        String        @id @default(uuid())
+  threadId  String
+  thread    MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User          @relation(fields: [senderId], references: [id])
+  body      String
+  readAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([threadId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Disputes
+// ---------------------------------------------------------------------------
+
+enum DisputeStatus {
+  OPEN
+  SELLER_RESPONDED
+  ESCALATED
+  RESOLVED_BUYER
+  RESOLVED_SELLER
+  CLOSED
+}
+
+model Dispute {
+  id        String        @id @default(uuid())
+  orderId   String
+  order     Order         @relation(fields: [orderId], references: [id])
+  openedById String
+  openedBy  User          @relation("DisputeOpener", fields: [openedById], references: [id])
+  reason    String
+  status    DisputeStatus @default(OPEN)
+  resolutionNote String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  events DisputeEvent[]
+
+  @@index([status])
+}
+
+model DisputeEvent {
+  id        String   @id @default(uuid())
+  disputeId String
+  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  actorId   String
+  fromStatus DisputeStatus
+  toStatus   DisputeStatus
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Tax
+// ---------------------------------------------------------------------------
+
+// Marketplace-facilitator tax rates keyed by destination country (and
+// optionally region). Real systems source this from a tax provider; this
+// table is the local cache / fallback.
+model TaxRate {
+  id          String  @id @default(uuid())
+  countryCode String
+  region      String? // state/province; null = country-wide
+  kind        String // "VAT", "GST", "SALES"
+  rateBps     Int // basis points; 2000 = 20%
+  active      Boolean @default(true)
+
+  @@unique([countryCode, region])
+}
+
+// ---------------------------------------------------------------------------
+// Admin / audit
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  action    String
+  entityType String
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+}

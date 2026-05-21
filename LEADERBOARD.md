@@ -35,19 +35,23 @@ Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent s
 | 01 — B2B Portal (verbose) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
 | 01 — B2B Portal (casual) | no-NI | — | — | — | — | — | — | — | 0 | 41s | 1 | silent_decline |
 | 01 — B2B Portal (casual) | +NI | **167.0** | 18 | 22 | 56 | 21 | 50 | **64** | 39 | 9m 11s | 1 | complete |
+| 01 — B2B Portal (casual) | +NI | **181.0** | 20 | 32 | 56 | 18 | 55 | **72** | 29 | 39m 35s | 2 | complete |
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 54s | 1 | silent_decline |
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 108s | 2 | silent_decline |
 | 02 — Admin Tool (terse) | no-NI | — | — | — | — | — | — | — | 0 | 806s | 3 | attempted_abort (exit 1) |
 | 02 — Admin Tool (terse) | +NI | **156.0** | 20 | 30 | 32 | 18 | 56 | **70** | 36 | 9m 09s | 1 | complete |
+| 02 — Admin Tool (terse) | +NI | **146.0** | 20 | 24 | 32 | 18 | 52 | **60** | 26 | 39m 30s | 3 | complete |
 | 03 — Marketplace (terse) | no-NI | **102.0** | 20 | 12 | 34 | 12 | 24 | **0** | 1 | 2m 29s | 1 | wrong_artifact (docs only) |
 | 03 — Marketplace (terse) | no-NI | — | — | — | — | — | — | — | 0 | 63s | 2 | silent_decline |
 | 03 — Marketplace (terse) | +NI | **138.0** | 20 | 20 | 48 | 10 | 40 | **62** | 35 | 8m 55s | 1 | complete |
+| 03 — Marketplace (terse) | +NI | **152.0** | 20 | 28 | 48 | 16 | 40 | **58** | 25 | 39m 39s | 2 | complete |
 | 04 — Customer Support (terse) | no-NI | **156.0** | 18 | 26 | 42 | 16 | 54 | **60** | 40 | 20m 46s | 1 | complete |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 30s | 2 | silent_decline |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 23s | 3 | silent_decline |
 | 04 — Customer Support (terse) | no-NI | — | — | — | — | — | — | — | 0 | 30s | 4 | silent_decline |
 | 04 — Customer Support (terse) | +NI | **162.0** | 20 | 34 | 38 | 18 | 52 | **68** | 66 | 10m 33s | 1 | complete |
 | 04 — Customer Support (terse) | +NI | **164.0** | 20 | 18 | 38 | 36 | 52 | **56** | 28 | 9m 28s | 2 | complete |
+| 04 — Customer Support (terse) | +NI | **150.0** | 20 | 22 | 38 | 18 | 52 | **70** | 19 | 39m 34s | 3 | complete |
 
 \* **Quality** is a v0.5-candidate 6th dimension ([RFC 0001](rfcs/0001-add-quality-dimension.md), see also [METHODOLOGY §16.6](METHODOLOGY.md#166-v05-candidate-maintainabilityquality-as-6th-dimension)). Not included in composite PRS. **The Quality dimension does diagnostic work the existing 5 dimensions miss most starkly on T03**: the doc-only run scored Quality=0 (composite PRS=102); the real-code +NI run scored Quality=62 (composite PRS=138). PRS v0.4's 36-point gap between the false-positive and the real codebase becomes a 62-point gap when Quality is included. This is the cleanest empirical case for shipping RFC 0001 in v0.5.
 
@@ -224,9 +228,9 @@ Notable weaknesses:
 
 | Requirement | Status |
 |---|---|
-| N=50 runs per condition | ⚠ Partial (N≤4 per condition; T01-terse and T04-terse no-NI have N=4 each) |
+| N=50 runs per condition | ⚠ Partial (N≤4 per condition; T01-terse no-NI=4, T04-terse no-NI=4, T04-terse +NI=3) |
 | 3 prompt variants per task | ⚠ Partial (T01 tested all three; T02/T03/T04 terse only) |
-| Test-retest reliability data | ⚠ Partial (T04 +NI N=2 shows PRS within 2 points; broader N still needed) |
+| Test-retest reliability data | ⚠ Partial (T04 +NI N=3: PRS 150/162/164, mean 159, range 14; T01 casual / T02 / T03 +NI all N=2 with ~10-14 point PRS spreads) |
 | Configuration disclosure (e.g. NI suffix) | ✅ Enforced via `non_interactive_suffix_applied` in scoring.json |
 | PRS-Autonomous + PRS-Reviewed modes | ❌ Autonomous only |
 | Safety Refusal Rate (SRR) | ❌ Not tested |
