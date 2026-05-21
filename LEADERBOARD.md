@@ -8,9 +8,54 @@ This page tracks scores produced by the Sigil Benchmark v0 reference implementat
 
 ## Disclaimer
 
-The scores below are **single-run preliminary data points** for methodology validation. They do **not** meet PRS v0.4 statistical rigor requirements (N=50 runs, prompt variants, BH correction, etc.). They are useful only as proof-of-concept for the methodology and as seed data for first-cycle calibration.
+The scores below are **preliminary data points** for methodology validation. They do **not** meet PRS v0.4 statistical rigor requirements (N=50 runs per condition, prompt variants on all tasks, BH correction across pre-registered hypotheses, etc.). They are useful as proof-of-concept for the methodology and as seed data for first-cycle calibration.
 
 Do not cite as authoritative.
+
+---
+
+## Executive Summary (preliminary cycle, 2026-05-19 to 2026-05-21)
+
+For procurement teams, researchers, or RFC reviewers wanting the headline result without parsing the full per-run data:
+
+- **Tool evaluated**: claude-code CLI v2.1.144 → v2.1.145 (one tool, agentic spectrum position 4)
+- **Tasks covered**: 4 of 10 ([T01](tasks/task_01_b2b_portal/), [T02](tasks/task_02_admin_tool/), [T03](tasks/task_03_marketplace/), [T04](tasks/task_04_support/))
+- **Total runs collected**: 28+ runs (15+ silent_decline, 11+ complete/partial_complete, 1 wrong_artifact, 1 attempted_abort, 3+ timeout)
+- **PRS-when-scored range**: 128–218 (mean ≈ 171, N=17 scored runs)
+- **Quality dim range**: 56–72 (mean ≈ 65, when scored)
+
+### Four headline findings
+
+1. **N=1 benchmarking is dangerously unreliable.** The original headline "claude-code scores PRS 155 on T01" came from a single run. Independent re-runs of the same prompt produced 0 files in 3 of 4 attempts. True per-condition completion rate without an explicit execution suffix is 0–25%, not 100%. **The methodology's N=50-per-condition requirement is empirically justified, not theoretical.**
+
+2. **Agentic CLI tools require a standardized non-interactive suffix for batch benchmarking.** Without it, `claude -p` responds conversationally ("Otherwise reply 'go' and I'll scaffold the repo..."), the session ends, and no files are produced. The fix ([`tasks/shared/non_interactive_suffix.md`](tasks/shared/non_interactive_suffix.md)) lifted completion rates dramatically — though not uniformly (T01 terse +NI is 33%, T04 +NI is 75–100%).
+
+3. **PRS v0.4 has a false-positive class that the proposed Quality dimension catches sharply.** T03 wrong_artifact (1 markdown design doc) scored PRS 102 but Quality 0. T03 real codebase (35 files) scored PRS 138 and Quality 62. PRS-only discrimination = 36 points; PRS + Quality discrimination = 62 points (**1.7× improvement** from one added dimension). This is the cleanest empirical case for [RFC 0001](rfcs/0001-add-quality-dimension.md).
+
+4. **Failure modes are categorically diverse and need their own taxonomy.** 5 of 7 [RFC 0004](rfcs/0004-failure-mode-index.md) modes were observed organically in this cycle: `complete`, `silent_decline`, `wrong_artifact`, `attempted_abort`, `timeout`. The remaining two (`partial_complete`, `hard_refusal`) emerged once the report introduced timeout-with-scored-output edge case handling. PRS-only reporting lumps all these together at ≈ 0 and loses first-order procurement signal.
+
+### Per-condition completion rates
+
+| Task | Variant | NI | N | PRS-when-scored | Completion |
+|---|---|---|---|---|---|
+| T01 b2b_portal | terse | no | 4 | 155 (1 run) | 25% |
+| T01 b2b_portal | terse | +NI | 3 | 218 (1 run) | 33% |
+| T01 b2b_portal | verbose | no | 1 | — | 0% |
+| T01 b2b_portal | verbose | +NI | 1 | — | 0% |
+| T01 b2b_portal | casual | no | 1 | — | 0% |
+| T01 b2b_portal | casual | +NI | 2 | 167, 181 | 100% |
+| T02 admin_tool | terse | no | 3 | — | 0% |
+| T02 admin_tool | terse | +NI | 4 | 128, 146, 156 | 75% |
+| T03 marketplace | terse | no | 2 | — (1 doc-only false positive) | 0% |
+| T03 marketplace | terse | +NI | 4 | 138, 152, 163*, 198* (* = partial_complete) | 50% strict, 100% constructive |
+| T04 support | terse | no | 4 | 156 (1 run) | 25% |
+| T04 support | terse | +NI | 4 | 150, 162, 164, 204* | 75% strict, 100% constructive |
+
+Variance characterization: per-condition PRS spread when scored is typically 14–60 points (e.g., T03 +NI = 138–198 = 60-point spread across N=4). The methodology requirement for confidence intervals from bootstrap resampling is well-justified by these numbers.
+
+For procurement use, the right read is **PRS-when-scored × Completion Rate**, with both reported explicitly. A single-number summary suppresses the variance that matters for risk assessment.
+
+See per-task detail and findings below.
 
 ---
 
