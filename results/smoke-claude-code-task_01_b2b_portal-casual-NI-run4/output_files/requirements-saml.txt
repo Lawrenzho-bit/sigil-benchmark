@@ -1,0 +1,5 @@
+# SAML 2.0 SSO support. Kept separate because python3-saml requires the
+# system libraries libxml2 and libxmlsec1 (installed in the Dockerfile).
+# The application degrades gracefully when this package is absent: SSO
+# routes return a clear "SSO not available" error instead of crashing.
+python3-saml==1.16.0

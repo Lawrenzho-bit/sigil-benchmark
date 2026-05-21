@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Team — Acme Portal{% endblock %}
+{% block content %}
+<h1>Team</h1>
+<p class="muted">
+  {{ members|length }} member(s) &middot; {{ seats_available }} seat(s) available.
+</p>
+
+{% if auth.can_manage %}
+<div class="card">
+  <h2>Invite a teammate</h2>
+  <form method="post" action="/team/invite">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="grid">
+      <div>
+        <label for="invite_email">Email</label>
+        <input id="invite_email" type="email" name="email" required>
+      </div>
+      <div>
+        <label for="invite_role">Role</label>
+        <select id="invite_role" name="role">
+          {% for r in assignable_roles %}
+          <option value="{{ r.value }}">{{ r.value|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <p style="margin-top:14px">
+      <button type="submit" class="btn btn-primary"
+              {% if seats_available <= 0 %}disabled title="No seats available"{% endif %}>
+        Send invitation
+      </button>
+    </p>
+  </form>
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Members</h2>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th>
+      {% if auth.can_manage %}<th></th>{% endif %}</tr>
+    </thead>
+    <tbody>
+      {% for m in members %}
+      <tr>
+        <td>{{ m.user.full_name or "—" }}</td>
+        <td>{{ m.user.email }}</td>
+        <td><span class="badge badge-{{ m.role.value }}">{{ m.role.value }}</span></td>
+        <td class="muted">{{ m.created_at.strftime("%Y-%m-%d") }}</td>
+        {% if auth.can_manage %}
+        <td>
+          {% if m.user_id != auth.user.id %}
+          <form method="post" action="/team/{{ m.id }}/role" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <select name="role" data-autosubmit aria-label="Change role">
+              <option value="viewer" {{ "selected" if m.role.value == "viewer" }}>Viewer</option>
+              <option value="admin" {{ "selected" if m.role.value == "admin" }}>Admin</option>
+              {% if auth.is_owner %}
+              <option value="owner" {{ "selected" if m.role.value == "owner" }}>Owner</option>
+              {% endif %}
+            </select>
+            <noscript><button type="submit" class="link-button">Save</button></noscript>
+          </form>
+          <form method="post" action="/team/{{ m.id }}/remove" class="inline"
+                data-confirm="Remove {{ m.user.email }} from this organization?">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="link-button" style="color:var(--danger)">Remove</button>
+          </form>
+          {% else %}
+          <span class="muted">You</span>
+          {% endif %}
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if auth.can_manage and pending %}
+<div class="card">
+  <h2>Pending invitations</h2>
+  <table>
+    <thead><tr><th>Email</th><th>Role</th><th>Expires</th><th></th></tr></thead>
+    <tbody>
+      {% for inv in pending %}
+      <tr>
+        <td>{{ inv.email }}</td>
+        <td><span class="badge badge-{{ inv.role.value }}">{{ inv.role.value }}</span></td>
+        <td class="muted">{{ inv.expires_at.strftime("%Y-%m-%d") }}</td>
+        <td>
+          <form method="post" action="/team/invite/{{ inv.id }}/revoke" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="link-button">Revoke</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if not auth.can_manage %}
+<p class="hint">You have viewer access — you can see the team but not make changes.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Billing — Acme Portal{% endblock %}
+{% block content %}
+<h1>Billing</h1>
+
+{% if not billing_configured %}
+<div class="flash flash-info">
+  Billing is running in demo mode — Stripe keys are not configured on this
+  environment. Plan changes below are disabled.
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Current plan</h2>
+  <p>
+    <strong>{{ PLAN_LABELS[current_plan.value] }}</strong>
+    {% if subscription %}
+      &middot; status: {{ subscription.status.value }}
+      {% if subscription.current_period_end %}
+        &middot; renews {{ subscription.current_period_end.strftime("%Y-%m-%d") }}
+      {% endif %}
+      {% if subscription.cancel_at_period_end %}
+        <span class="badge" style="background:#fee2e2;color:var(--danger)">cancels at period end</span>
+      {% endif %}
+    {% else %}
+      &middot; no active subscription
+    {% endif %}
+  </p>
+  {% if subscription and subscription.stripe_customer_id %}
+  <form method="post" action="/billing/portal" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn btn-ghost btn-sm" {{ "disabled" if not billing_configured }}>
+      Manage payment method &amp; invoices
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+<h2>Plans</h2>
+<div class="pricing">
+  {% for plan in plans %}
+  <div class="plan-card {{ 'current' if plan.code == current_plan.value }}">
+    <h3>{{ plan.label }}</h3>
+    <p class="plan-price">${{ plan.price }}<span class="muted" style="font-size:14px">/mo</span></p>
+    <p class="muted">Up to {{ plan.seats }} seats</p>
+    {% if plan.code == current_plan.value %}
+      <button class="btn btn-ghost btn-sm" disabled>Current plan</button>
+    {% else %}
+      {% set is_new = not (subscription and subscription.is_live and subscription.stripe_subscription_id) %}
+      <form method="post"
+            action="{{ '/billing/checkout' if is_new else '/billing/change-plan' }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="plan" value="{{ plan.code }}">
+        <button type="submit" class="btn btn-primary btn-sm" {{ "disabled" if not billing_configured }}>
+          {{ "Subscribe" if is_new else "Switch to this plan" }}
+        </button>
+      </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+<p class="hint">
+  Payments, cards, and invoices are processed by Stripe — card data never touches
+  our servers. Upgrades take effect immediately; downgrades are prorated.
+</p>
+{% endblock %}

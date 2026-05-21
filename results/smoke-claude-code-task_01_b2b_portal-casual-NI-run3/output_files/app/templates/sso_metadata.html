@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}SSO setup — Acme Portal{% endblock %}
+{% block content %}
+<h1>Single sign-on setup</h1>
+<div class="card">
+  <h2>Service Provider (SP) values</h2>
+  <p class="muted">Give these to your identity provider administrator.</p>
+  <table>
+    <tr><th>SP Entity ID</th><td><code>{{ settings.base_url }}/sso/metadata</code></td></tr>
+    <tr><th>ACS URL</th><td><code>{{ settings.base_url }}/sso/acs</code></td></tr>
+    <tr><th>ACS binding</th><td><code>HTTP-POST</code></td></tr>
+    <tr><th>NameID format</th><td><code>emailAddress</code></td></tr>
+  </table>
+</div>
+<div class="card">
+  <h2>How to sign in with SSO</h2>
+  <p>
+    Once an owner has configured your identity provider under
+    <em>Organization settings &rarr; Single sign-on</em>, members sign in at:
+  </p>
+  <p><code>{{ settings.base_url }}/sso/login?org=&lt;your-org-slug&gt;</code></p>
+  <p class="hint">
+    The org slug is shown on the Organization settings page. New users are
+    provisioned automatically as viewers on first SSO sign-in.
+  </p>
+</div>
+{% endblock %}

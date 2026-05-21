@@ -1,0 +1,76 @@
+# Local / single-node deployment. For production scale (10k agents, 1M+ tickets/year)
+# run the api / worker-sla / worker-email services as independently scaled replicas
+# behind a load balancer, and point DATABASE_URL at a managed Postgres cluster.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: support
+      POSTGRES_PASSWORD: support
+      POSTGRES_DB: support_desk
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U support -d support_desk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Dev-only SMTP sink so outbound email can be inspected without a real relay.
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  migrate:
+    build: .
+    command: npm run migrate
+    environment:
+      DATABASE_URL: postgres://support:support@db:5432/support_desk
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: .
+    command: node dist/src/server.js
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://support:support@db:5432/support_desk
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker-sla:
+    build: .
+    command: npm run worker:sla
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://support:support@db:5432/support_desk
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker-email:
+    build: .
+    command: npm run worker:email
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://support:support@db:5432/support_desk
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:

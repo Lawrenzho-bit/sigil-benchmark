@@ -1,0 +1,98 @@
+{% extends "app_base.html" %}
+{% block title %}Organization settings — {{ app_name }}{% endblock %}
+
+{% block app_content %}
+<div class="page-head"><h1>Organization</h1></div>
+
+<div class="card">
+  <h2 class="card-title">Profile</h2>
+  <form method="post" action="/app/settings/organization">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label for="name">Organization name</label>
+      <input type="text" id="name" name="name" value="{{ organization.name }}"
+             maxlength="120" required {{ 'disabled' if not can_edit }}>
+    </div>
+    <div class="field">
+      <label>Workspace ID</label>
+      <input type="text" class="mono" value="{{ organization.slug }}" readonly>
+      <p class="hint">Members use this to sign in with SSO.</p>
+    </div>
+    {% if can_edit %}
+    <button type="submit" class="btn btn-primary">Save changes</button>
+    {% else %}
+    <p class="muted">You need an owner or admin role to edit these settings.</p>
+    {% endif %}
+  </form>
+</div>
+
+<div class="card">
+  <h2 class="card-title">Single sign-on (SAML 2.0)</h2>
+  {% if not saml_available %}
+    <div class="alert alert-warn">
+      The SAML toolkit is not installed on this deployment, so SSO cannot be
+      used even once configured.
+    </div>
+  {% endif %}
+
+  <p class="muted">Provide these values to your identity provider:</p>
+  <table>
+    <tbody>
+      <tr><td>SP ACS URL</td>
+        <td class="mono">{{ base_url }}/auth/saml/{{ organization.id }}/acs</td></tr>
+      <tr><td>SP metadata</td>
+        <td class="mono">{{ base_url }}/auth/saml/metadata</td></tr>
+    </tbody>
+  </table>
+
+  {% if organization.sso_enabled %}
+    <div class="alert" style="background:var(--ok-bg);color:var(--ok)">
+      SSO is <strong>enabled</strong>. Default role for new SSO users:
+      {{ organization.saml_default_role.label }}.
+    </div>
+    <p class="muted mono">IdP: {{ organization.saml_idp_entity_id }}</p>
+    {% if can_manage_sso %}
+    <form method="post" action="/app/settings/sso/disable" class="inline-form"
+          data-confirm="Disable single sign-on for this organization?">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn btn-danger btn-sm">Disable SSO</button>
+    </form>
+    {% endif %}
+  {% endif %}
+
+  {% if can_manage_sso %}
+  <details {{ 'open' if not organization.sso_enabled }} style="margin-top:1rem">
+    <summary><strong>{{ 'Update' if organization.sso_enabled else 'Configure' }}
+      identity provider</strong></summary>
+    <form method="post" action="/app/settings/sso" style="margin-top:1rem">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="idp_entity_id">IdP Entity ID</label>
+        <input type="text" id="idp_entity_id" name="idp_entity_id"
+               value="{{ organization.saml_idp_entity_id or '' }}" required>
+      </div>
+      <div class="field">
+        <label for="idp_sso_url">IdP SSO URL</label>
+        <input type="url" id="idp_sso_url" name="idp_sso_url"
+               value="{{ organization.saml_idp_sso_url or '' }}" required>
+      </div>
+      <div class="field">
+        <label for="idp_x509_cert">IdP X.509 signing certificate</label>
+        <textarea id="idp_x509_cert" name="idp_x509_cert" required
+          placeholder="-----BEGIN CERTIFICATE-----">{{ organization.saml_idp_x509_cert or '' }}</textarea>
+      </div>
+      <div class="field">
+        <label for="default_role">Default role for new SSO users</label>
+        <select id="default_role" name="default_role">
+          {% for role in sso_default_roles %}
+          <option value="{{ role.value }}"
+            {{ 'selected' if role == organization.saml_default_role }}>{{ role.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save &amp; enable SSO</button>
+    </form>
+  </details>
+  {% endif %}
+</div>
+{% endblock %}

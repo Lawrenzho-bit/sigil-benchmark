@@ -1,0 +1,85 @@
+{% extends "app_base.html" %}
+{% block title %}Data &amp; privacy — {{ app_name }}{% endblock %}
+
+{% block app_content %}
+<div class="page-head"><h1>Data &amp; privacy</h1></div>
+
+<div class="card">
+  <h2 class="card-title">Communication preferences</h2>
+  <form method="post" action="/app/account/consent">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label class="checkbox">
+        <input type="checkbox" name="marketing_consent" value="true"
+               {{ 'checked' if current_user.marketing_consent }}>
+        <span>Send me occasional product updates and announcements.</span>
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Save preferences</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2 class="card-title">Export your data</h2>
+  <p class="muted">
+    Download a machine-readable copy of the personal data we hold about you
+    (GDPR Article 15 &amp; 20).
+  </p>
+  <form method="post" action="/app/account/export">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn btn-primary">Generate export</button>
+  </form>
+
+  {% if exports %}
+  <table style="margin-top:1rem">
+    <thead><tr><th>Requested</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for ex in exports %}
+      <tr>
+        <td class="muted">{{ ex.created_at.strftime('%d %b %Y %H:%M') }}</td>
+        <td>
+          <span class="badge {{ 'badge-ok' if ex.status.value == 'ready'
+            else 'badge-err' if ex.status.value == 'failed' else 'badge-warn' }}">
+            {{ ex.status.value }}</span>
+        </td>
+        <td>
+          {% if ex.status.value == 'ready' %}
+          <a href="/app/account/export/{{ ex.id }}/download"
+             class="btn btn-sm btn-ghost">Download JSON</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="card" style="border-color:var(--err)">
+  <h2 class="card-title" style="color:var(--err)">Delete account</h2>
+  <p class="muted">
+    Permanently delete your account and erase your personal data (GDPR Article
+    17). This cannot be undone. If you are the sole owner of an organization
+    with other members, transfer ownership first.
+  </p>
+  <form method="post" action="/app/account/delete"
+        data-confirm="Permanently delete your account? This cannot be undone.">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% if current_user.has_password %}
+    <div class="field">
+      <label for="confirm_password">Confirm with your password</label>
+      <input type="password" id="confirm_password" name="confirm_password"
+             required autocomplete="current-password">
+    </div>
+    {% else %}
+    <div class="field">
+      <label class="checkbox">
+        <input type="checkbox" name="confirm" value="true" required>
+        <span>I understand this permanently deletes my account.</span>
+      </label>
+    </div>
+    {% endif %}
+    <button type="submit" class="btn btn-danger">Delete my account</button>
+  </form>
+</div>
+{% endblock %}

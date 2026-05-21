@@ -1,0 +1,278 @@
+// Internal Admin Tool — data model.
+// Postgres. Generated client at @prisma/client.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Admin identity & authorization -----------------------------------------
+
+enum AdminRole {
+  SUPER_ADMIN
+  ACCOUNT_ADMIN
+  SUPPORT
+  FINANCE
+  READ_ONLY
+}
+
+enum SsoProvider {
+  SAML
+  OIDC
+  DEV
+}
+
+// An internal employee who can log into this tool. Always created via SSO JIT
+// provisioning — there are no local passwords anywhere in this system.
+model AdminUser {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  name         String
+  role         AdminRole   @default(READ_ONLY)
+  ssoProvider  SsoProvider
+  ssoSubject   String // stable subject/nameID from the IdP
+  isActive     Boolean     @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  apiTokens     ApiToken[]
+  announcements Announcement[]
+  bulkJobs      BulkJob[]
+  impersonations Impersonation[]
+
+  @@index([role])
+  @@map("admin_users")
+}
+
+// --- Customer data ----------------------------------------------------------
+
+enum OrgStatus {
+  ACTIVE
+  SUSPENDED
+  CHURNED
+}
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  plan      String    @default("free")
+  status    OrgStatus @default(ACTIVE)
+  region    String    @default("us-east")
+  seats     Int       @default(5)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  endUsers      EndUser[]
+  flagOverrides FeatureFlagOverride[]
+  apiTokens     ApiToken[]
+
+  @@index([status])
+  @@index([plan])
+  @@map("organizations")
+}
+
+enum EndUserStatus {
+  ACTIVE
+  INVITED
+  DEACTIVATED
+}
+
+// A user belonging to a customer organization (the people admins manage).
+model EndUser {
+  id           String        @id @default(uuid())
+  orgId        String
+  org          Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  email        String
+  name         String
+  status       EndUserStatus @default(ACTIVE)
+  orgRole      String        @default("member")
+  lastActiveAt DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  impersonations Impersonation[]
+
+  @@unique([orgId, email])
+  @@index([email])
+  @@index([status])
+  @@map("end_users")
+}
+
+// --- Audit ------------------------------------------------------------------
+
+enum ActorType {
+  ADMIN_USER
+  API_TOKEN
+  SYSTEM
+}
+
+// Append-only record of every state-changing admin action. Never updated or
+// deleted by application code.
+model AuditLog {
+  id          String    @id @default(uuid())
+  actorType   ActorType
+  actorId     String? // AdminUser.id or ApiToken.id
+  actorEmail  String? // denormalized for stable history if the actor is removed
+  action      String // e.g. "user.deactivate", "flag.toggle"
+  targetType  String? // e.g. "EndUser", "Organization"
+  targetId    String?
+  targetLabel String? // human-readable label captured at write time
+  diff        Json? // { field: { before, after } }
+  metadata    Json? // free-form extra context
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// --- Impersonation ----------------------------------------------------------
+
+model Impersonation {
+  id          String    @id @default(uuid())
+  adminId     String
+  admin       AdminUser @relation(fields: [adminId], references: [id])
+  endUserId   String
+  endUser     EndUser   @relation(fields: [endUserId], references: [id])
+  reason      String
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+
+  @@index([adminId])
+  @@index([endUserId])
+  @@map("impersonations")
+}
+
+// --- Feature flags ----------------------------------------------------------
+
+model FeatureFlag {
+  id            String   @id @default(uuid())
+  key           String   @unique
+  description   String   @default("")
+  globalEnabled Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  overrides FeatureFlagOverride[]
+
+  @@map("feature_flags")
+}
+
+// Per-organization override of a flag's global value.
+model FeatureFlagOverride {
+  id      String       @id @default(uuid())
+  flagId  String
+  flag    FeatureFlag  @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  orgId   String
+  org     Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  enabled Boolean
+
+  @@unique([flagId, orgId])
+  @@map("feature_flag_overrides")
+}
+
+// --- API tokens -------------------------------------------------------------
+
+model ApiToken {
+  id          String    @id @default(uuid())
+  name        String
+  tokenPrefix String // first chars of the token, shown in the UI
+  tokenHash   String    @unique // sha-256 of the full secret; secret never stored
+  scopes      String[] // subset of permission strings this token may exercise
+  createdById String
+  createdBy   AdminUser @relation(fields: [createdById], references: [id])
+  orgId       String? // optional: restrict token to one organization
+  org         Organization? @relation(fields: [orgId], references: [id])
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  usages ApiTokenUsage[]
+
+  @@index([createdById])
+  @@map("api_tokens")
+}
+
+// Lightweight per-request usage record for the token usage view.
+model ApiTokenUsage {
+  id         String   @id @default(uuid())
+  tokenId    String
+  token      ApiToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  endpoint   String
+  method     String
+  statusCode Int
+  createdAt  DateTime @default(now())
+
+  @@index([tokenId, createdAt])
+  @@map("api_token_usages")
+}
+
+// --- Broadcast communications -----------------------------------------------
+
+enum AnnouncementStatus {
+  DRAFT
+  SENT
+}
+
+model Announcement {
+  id             String             @id @default(uuid())
+  subject        String
+  body           String
+  audienceFilter Json // { orgId?, plan?, status?, orgStatus? }
+  status         AnnouncementStatus @default(DRAFT)
+  recipientCount Int                @default(0)
+  sentById       String
+  sentBy         AdminUser          @relation(fields: [sentById], references: [id])
+  createdAt      DateTime           @default(now())
+  sentAt         DateTime?
+
+  @@index([status])
+  @@map("announcements")
+}
+
+// --- Bulk operations --------------------------------------------------------
+
+enum BulkJobStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model BulkJob {
+  id           String        @id @default(uuid())
+  type         String // e.g. "end_user.import"
+  status       BulkJobStatus @default(PENDING)
+  fileName     String
+  totalRows    Int           @default(0)
+  successRows  Int           @default(0)
+  errorRows    Int           @default(0)
+  errors       Json? // [{ row, message }]
+  createdById  String
+  createdBy    AdminUser     @relation(fields: [createdById], references: [id])
+  createdAt    DateTime      @default(now())
+
+  @@index([createdById])
+  @@map("bulk_jobs")
+}
+
+// --- Session store (managed by connect-pg-simple) ---------------------------
+
+model Session {
+  sid    String   @id
+  sess   Json
+  expire DateTime
+
+  @@index([expire])
+  @@map("session")
+}

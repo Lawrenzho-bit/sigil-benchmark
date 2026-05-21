@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} — the B2B customer portal{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>One portal for your B2B customers</h1>
+  <p>
+    Onboarding, single sign-on, role-based access, billing, and a complete
+    audit trail — production-ready from day one.
+  </p>
+  <a href="/auth/signup" class="btn btn-primary">Create your workspace</a>
+  <a href="/auth/sso" class="btn btn-ghost">Sign in with SSO</a>
+</section>
+
+<section class="feature-grid">
+  <div class="card">
+    <h2>Secure by default</h2>
+    <p class="muted">
+      SAML SSO, Argon2 password hashing, CSRF protection, login rate limiting,
+      and a strict content-security policy.
+    </p>
+  </div>
+  <div class="card">
+    <h2>Roles that fit teams</h2>
+    <p class="muted">
+      Owners, admins, and viewers — invite people, change roles, and remove
+      access, all recorded in the audit log.
+    </p>
+  </div>
+  <div class="card">
+    <h2>Billing built in</h2>
+    <p class="muted">
+      Stripe-powered subscriptions with upgrades, downgrades, and receipts on
+      every payment.
+    </p>
+  </div>
+</section>
+
+<section class="card">
+  <h2 class="card-title">Simple, transparent pricing</h2>
+  <div class="plan-grid">
+    {% for plan in plans %}
+    <div class="card plan">
+      <h3>{{ plan.label }}</h3>
+      <div class="price">${{ plan.monthly_price_usd }}<span class="muted" style="font-size:.9rem">/mo</span></div>
+      <p class="muted">Up to {{ plan.seats }} seats</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

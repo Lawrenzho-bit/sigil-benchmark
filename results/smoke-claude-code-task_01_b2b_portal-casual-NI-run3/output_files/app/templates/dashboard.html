@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Acme Portal{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<p class="muted">Overview for {{ auth.organization.name }}.</p>
+
+<div class="grid">
+  <div class="metric">
+    <div class="value">{{ metrics.member_count }}<span class="muted" style="font-size:15px"> / {{ metrics.seat_limit }}</span></div>
+    <div class="label">Seats used</div>
+    <div class="progress" style="margin-top:8px">
+      <span style="width: {{ metrics.seats_used_pct }}%"></span>
+    </div>
+  </div>
+  <div class="metric">
+    <div class="value">{{ metrics.pending_invites }}</div>
+    <div class="label">Pending invitations</div>
+  </div>
+  <div class="metric">
+    <div class="value">{{ metrics.active_sessions }}</div>
+    <div class="label">Active sessions</div>
+  </div>
+  <div class="metric">
+    <div class="value">{{ metrics.logins_last_7d }}</div>
+    <div class="label">Sign-ins (last 7 days)</div>
+  </div>
+  <div class="metric">
+    <div class="value">{{ PLAN_LABELS[metrics.plan.value] }}</div>
+    <div class="label">Current plan</div>
+  </div>
+  <div class="metric">
+    <div class="value">${{ metrics.monthly_cost_usd }}</div>
+    <div class="label">Monthly cost</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Recent activity</h2>
+  {% if metrics.recent_activity %}
+  <table>
+    <thead>
+      <tr><th>When</th><th>Action</th><th>By</th></tr>
+    </thead>
+    <tbody>
+      {% for entry in metrics.recent_activity %}
+      <tr>
+        <td class="muted">{{ entry.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+        <td>{{ entry.action }}</td>
+        <td>{{ entry.actor_email or "system" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No activity recorded yet.</p>
+  {% endif %}
+  {% if auth.can_manage %}
+  <p style="margin-top:14px"><a href="/audit">View full audit log &rarr;</a></p>
+  {% endif %}
+</div>
+{% endblock %}

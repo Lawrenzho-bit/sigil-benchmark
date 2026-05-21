@@ -1,0 +1,42 @@
+# Local development stack: Postgres + the application.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: portal
+      POSTGRES_DB: portal
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: development
+      DEBUG: "true"
+      SECRET_KEY: ${SECRET_KEY:-dev-only-secret-key-not-for-production-use-32c}
+      BASE_URL: http://localhost:8000
+      DATABASE_URL: postgresql+asyncpg://portal:portal@db:5432/portal
+      SESSION_COOKIE_SECURE: "false"
+      EMAIL_BACKEND: console
+      SEED_ON_START: "true"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      STRIPE_PRICE_STARTER: ${STRIPE_PRICE_STARTER:-price_starter}
+      STRIPE_PRICE_PRO: ${STRIPE_PRICE_PRO:-price_pro}
+      STRIPE_PRICE_ENTERPRISE: ${STRIPE_PRICE_ENTERPRISE:-price_enterprise}
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:

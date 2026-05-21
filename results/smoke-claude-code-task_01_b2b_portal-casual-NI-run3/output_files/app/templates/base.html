@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Acme Portal{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="/">Acme&nbsp;Portal</a>
+  {% if auth %}
+  <nav class="nav" aria-label="Primary">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/team">Team</a>
+    {% if auth.can_manage %}<a href="/audit">Audit log</a>{% endif %}
+    {% if auth.is_owner %}<a href="/billing">Billing</a>{% endif %}
+    <a href="/settings">Settings</a>
+  </nav>
+  <div class="topbar-right">
+    <span class="org-chip" title="Current organization">
+      {{ auth.organization.name }} &middot; <span class="role">{{ auth.role.value }}</span>
+    </span>
+    <form method="post" action="/auth/logout" class="inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="link-button">Sign out</button>
+    </form>
+  </div>
+  {% else %}
+  <nav class="nav" aria-label="Primary">
+    <a href="/auth/login">Sign in</a>
+    <a href="/auth/signup" class="btn btn-primary btn-sm">Get started</a>
+  </nav>
+  {% endif %}
+</header>
+
+{% if flashes %}
+<div class="flashes" role="status">
+  {% for f in flashes %}
+  <div class="flash flash-{{ f.category }}">{{ f.message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main id="main" class="container">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <span>&copy; Acme Portal</span>
+  <a href="/legal/privacy">Privacy</a>
+  <a href="/legal/terms">Terms</a>
+  <a href="/sso/metadata">SSO setup</a>
+</footer>
+
+<!-- GDPR cookie consent. Hidden by default; revealed by app.js when no choice
+     has been recorded. Only strictly-necessary cookies are set before consent. -->
+<div id="cookie-banner" class="cookie-banner" hidden>
+  <p>
+    We use a single strictly-necessary cookie to keep you signed in and to protect
+    forms. We set no advertising or analytics cookies.
+    <a href="/legal/privacy">Learn more</a>.
+  </p>
+  <form method="post" action="/cookie-consent" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" name="decision" value="accept" class="btn btn-primary btn-sm">Got it</button>
+    <button type="submit" name="decision" value="reject" class="btn btn-ghost btn-sm">Reject</button>
+  </form>
+</div>
+
+<script src="/static/js/app.js" defer></script>
+</body>
+</html>

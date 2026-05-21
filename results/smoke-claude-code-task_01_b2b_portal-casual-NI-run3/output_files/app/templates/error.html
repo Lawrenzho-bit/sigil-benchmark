@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — Acme Portal{% endblock %}
+{% block content %}
+<section class="card center">
+  <h1>{{ code }}</h1>
+  <p class="muted">{{ message }}</p>
+  <p><a href="/" class="btn btn-ghost">Back to home</a></p>
+</section>
+{% endblock %}

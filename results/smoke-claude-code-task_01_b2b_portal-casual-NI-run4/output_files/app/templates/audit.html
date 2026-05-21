@@ -1,0 +1,63 @@
+{% extends "app_base.html" %}
+{% block title %}Audit log — {{ app_name }}{% endblock %}
+
+{% block app_content %}
+<div class="page-head">
+  <h1>Audit log</h1>
+  <a href="/app/audit/export" class="btn btn-ghost btn-sm">Export CSV</a>
+</div>
+
+<div class="card">
+  <form method="get" action="/app/audit" class="inline-form" style="margin-bottom:1rem">
+    <label for="action" style="display:inline">Filter by action</label>
+    <select id="action" name="action" onchange="this.form.submit()">
+      <option value="">All actions</option>
+      {% for a in all_actions %}
+      <option value="{{ a }}" {{ 'selected' if a == action_filter }}>{{ a }}</option>
+      {% endfor %}
+    </select>
+    <noscript><button class="btn btn-sm btn-ghost">Apply</button></noscript>
+  </form>
+
+  <table>
+    <thead>
+      <tr><th>When (UTC)</th><th>Action</th><th>Actor</th><th>Detail</th><th>IP</th></tr>
+    </thead>
+    <tbody>
+      {% for e in entries %}
+      <tr>
+        <td class="muted mono">{{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ e.action | humanise_action }}</td>
+        <td class="muted">{{ e.actor_email or '—' }}</td>
+        <td class="muted">
+          {% if e.target_type %}{{ e.target_type }}{% endif %}
+          {% if e.meta %}
+            <span class="mono">{{ e.meta | tojson }}</span>
+          {% endif %}
+        </td>
+        <td class="muted mono">{{ e.ip_address or '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No audit entries yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if total_pages > 1 %}
+  <div style="display:flex; justify-content:space-between; margin-top:1rem">
+    {% set qs = '&action=' ~ action_filter if action_filter else '' %}
+    <span>
+      {% if page > 1 %}
+      <a class="btn btn-sm btn-ghost" href="/app/audit?page={{ page - 1 }}{{ qs }}">Previous</a>
+      {% endif %}
+    </span>
+    <span class="muted">Page {{ page }} of {{ total_pages }} &middot; {{ total }} entries</span>
+    <span>
+      {% if page < total_pages %}
+      <a class="btn btn-sm btn-ghost" href="/app/audit?page={{ page + 1 }}{{ qs }}">Next</a>
+      {% endif %}
+    </span>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

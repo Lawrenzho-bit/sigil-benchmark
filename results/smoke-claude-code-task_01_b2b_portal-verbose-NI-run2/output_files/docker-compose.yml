@@ -1,0 +1,43 @@
+# Local development stack: Postgres + the portal app.
+# Production should use a managed Postgres (RDS, Cloud SQL, Neon) instead.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: portal
+      POSTGRES_DB: portal
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U portal']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://portal:portal@db:5432/portal?schema=public&connection_limit=10
+      DIRECT_URL: postgresql://portal:portal@db:5432/portal?schema=public
+      SESSION_SECRET: dev-only-session-secret-change-me-please-32b
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:-ZGV2LW9ubHktMzItYnl0ZS1rZXktZG8tbm90LXVzZSE=}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_xxx}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_xxx}
+      RESEND_API_KEY: ${RESEND_API_KEY:-re_xxx}
+      EMAIL_FROM: ${EMAIL_FROM:-Portal <noreply@example.com>}
+      METRICS_TOKEN: ${METRICS_TOKEN:-dev-metrics-token}
+      LOG_LEVEL: info
+    ports:
+      - '3000:3000'
+
+volumes:
+  pgdata:

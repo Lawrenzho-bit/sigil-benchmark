@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Accept invitation — Acme Portal{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Join {{ org_name }}</h1>
+    <p class="muted">
+      You've been invited to join <strong>{{ org_name }}</strong> as a
+      {{ invitation.role.value }}.
+    </p>
+    <form method="post" action="/invite/accept">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="token" value="{{ token }}">
+      <label>Email</label>
+      <input type="email" value="{{ invitation.email }}" disabled>
+      {% if existing_user %}
+      <p class="hint">You already have an account — enter your password to join.</p>
+      <label for="password">Your password</label>
+      <input id="password" type="password" name="password" required autocomplete="current-password">
+      {% else %}
+      <label for="full_name">Your name</label>
+      <input id="full_name" type="text" name="full_name" required maxlength="120">
+      <label for="password">Choose a password</label>
+      <input id="password" type="password" name="password" required
+             autocomplete="new-password" minlength="10">
+      <p class="hint">At least 10 characters.</p>
+      {% endif %}
+      <p style="margin-top:16px">
+        <button type="submit" class="btn btn-primary" style="width:100%">
+          Accept invitation
+        </button>
+      </p>
+    </form>
+  </div>
+</div>
+{% endblock %}

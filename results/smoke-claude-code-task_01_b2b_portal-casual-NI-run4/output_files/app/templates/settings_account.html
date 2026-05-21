@@ -1,0 +1,59 @@
+{% extends "app_base.html" %}
+{% block title %}My account — {{ app_name }}{% endblock %}
+
+{% block app_content %}
+<div class="page-head"><h1>My account</h1></div>
+
+<div class="card">
+  <h2 class="card-title">Profile</h2>
+  <form method="post" action="/app/account/profile">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label for="full_name">Full name</label>
+      <input type="text" id="full_name" name="full_name"
+             value="{{ current_user.full_name }}" maxlength="120" required>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" value="{{ current_user.email }}" readonly>
+      <p class="hint">
+        {% if current_user.is_email_verified %}Verified.{% else %}
+        Not verified — check your inbox for the link.{% endif %}
+      </p>
+    </div>
+    <button type="submit" class="btn btn-primary">Save profile</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2 class="card-title">Password</h2>
+  {% if current_user.has_password %}
+  <form method="post" action="/app/account/password">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label for="current_password">Current password</label>
+      <input type="password" id="current_password" name="current_password"
+             required autocomplete="current-password">
+    </div>
+    <div class="field">
+      <label for="new_password">New password</label>
+      <input type="password" id="new_password" name="new_password"
+             required minlength="10" autocomplete="new-password">
+      <p class="hint">At least 10 characters, with letters and numbers.</p>
+    </div>
+    <div class="field">
+      <label for="new_password_confirm">Confirm new password</label>
+      <input type="password" id="new_password_confirm" name="new_password_confirm"
+             required minlength="10" autocomplete="new-password">
+    </div>
+    <button type="submit" class="btn btn-primary">Change password</button>
+    <p class="hint">Changing your password signs out all your other devices.</p>
+  </form>
+  {% else %}
+  <p class="muted">
+    Your account signs in through your organization's single sign-on, so there
+    is no password to manage here.
+  </p>
+  {% endif %}
+</div>
+{% endblock %}

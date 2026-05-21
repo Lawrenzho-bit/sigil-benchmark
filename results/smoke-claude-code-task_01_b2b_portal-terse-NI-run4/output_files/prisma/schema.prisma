@@ -1,0 +1,113 @@
+// B2B SaaS Portal — data model.
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  VIEWER
+}
+
+enum Plan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  NONE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+model Organization {
+  id                   String             @id @default(cuid())
+  name                 String
+  slug                 String             @unique
+  plan                 Plan               @default(STARTER)
+  subscriptionStatus   SubscriptionStatus @default(NONE)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  currentPeriodEnd     DateTime?
+  // Org-level settings.
+  timezone             String             @default("UTC")
+  requireSsoOnly       Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  users     User[]
+  invites   Invite[]
+  auditLogs AuditLog[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  name           String
+  passwordHash   String?      // null for SSO-only accounts
+  role           Role         @default(VIEWER)
+  active         Boolean      @default(true)
+  ssoProvider    String?      // e.g. "saml"
+  emailVerified  DateTime?
+  lastLoginAt    DateTime?
+  // Per-user settings.
+  notifyProduct  Boolean      @default(true)
+  notifyBilling  Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId          String
+
+  sentInvites    Invite[]     @relation("InvitedBy")
+  auditLogs      AuditLog[]   @relation("AuditActor")
+
+  @@index([orgId])
+}
+
+model Invite {
+  id           String       @id @default(cuid())
+  email        String
+  role         Role         @default(VIEWER)
+  token        String       @unique
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId        String
+
+  invitedBy    User         @relation("InvitedBy", fields: [invitedById], references: [id])
+  invitedById  String
+
+  @@unique([orgId, email])
+  @@index([orgId])
+}
+
+model AuditLog {
+  id          String       @id @default(cuid())
+  action      String       // e.g. "user.invited", "billing.plan_changed"
+  targetType  String?      // "user" | "organization" | "invite" | ...
+  targetId    String?
+  metadata    Json         @default("{}")
+  ip          String?
+  createdAt   DateTime     @default(now())
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId        String
+
+  actor       User?        @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorId     String?
+  actorEmail  String       // denormalized so logs survive actor deletion
+
+  @@index([orgId, createdAt])
+}

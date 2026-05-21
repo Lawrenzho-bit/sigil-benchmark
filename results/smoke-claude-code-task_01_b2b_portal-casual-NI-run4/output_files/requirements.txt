@@ -1,0 +1,19 @@
+# Core runtime dependencies. SAML extras live in requirements-saml.txt
+# (they need system libxmlsec) and dev/test extras in requirements-dev.txt.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+gunicorn==23.0.0
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+pydantic==2.10.4
+pydantic-settings==2.7.0
+jinja2==3.1.5
+python-multipart==0.0.20
+itsdangerous==2.2.0
+pwdlib[argon2]==0.2.1
+email-validator==2.2.0
+stripe==11.4.1
+aiosmtplib==3.0.2
+httpx==0.28.1
+structlog==24.4.0

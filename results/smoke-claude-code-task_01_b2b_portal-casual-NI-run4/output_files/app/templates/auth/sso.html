@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Sign in with SSO — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Single sign-on</h1>
+    {% if not saml_available %}
+      <div class="alert alert-warn">
+        SSO is not available on this deployment. Please sign in with your
+        email and password.
+      </div>
+    {% endif %}
+    <p class="muted">
+      Enter your organization's workspace ID to continue to your identity
+      provider.
+    </p>
+    <form method="post" action="/auth/sso">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="organization_slug">Workspace ID</label>
+        <input type="text" id="organization_slug" name="organization_slug"
+               required autofocus placeholder="acme-inc-1a2b3c">
+        <p class="hint">Ask your administrator if you're unsure.</p>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Continue</button>
+    </form>
+    <p class="hint" style="margin-top:1rem"><a href="/auth/login">Back to sign in</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+# Fly.io deployment target. `fly deploy` builds backend/Dockerfile and runs both
+# process groups. Provision managed Postgres (with TimescaleDB) and Redis, then set:
+#   fly secrets set DATABASE_URL=... REDIS_URL=... SESSION_SECRET=...
+app = "realtime-analytics"
+primary_region = "iad"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+
+[env]
+  SEED_DEMO = "false"
+
+[processes]
+  api = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+  worker = "python -m app.worker"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = false
+  min_machines_running = 1
+  processes = ["api"]
+
+[http_service.checks.health]
+  method = "GET"
+  path = "/health"
+  interval = "15s"
+  timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

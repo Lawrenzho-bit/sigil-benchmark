@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy — {{ app_name }}{% endblock %}
+
+{% block content %}
+<article class="card" style="max-width:760px;margin:1.5rem auto">
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated: 19 May 2026</p>
+
+  <p>
+    This policy explains what personal data {{ app_name }} ("we") collects,
+    why, and the rights you have under the EU/UK General Data Protection
+    Regulation (GDPR).
+  </p>
+
+  <h2>Data we collect</h2>
+  <ul>
+    <li><strong>Account data</strong> — your name, email address, and hashed password.</li>
+    <li><strong>Organization data</strong> — the organizations you belong to and your role.</li>
+    <li><strong>Security data</strong> — sign-in timestamps, IP addresses, and audit-log
+      entries, kept to protect your account and meet our compliance obligations.</li>
+    <li><strong>Billing data</strong> — handled by our payment processor, Stripe; we store
+      only a customer reference and subscription status, never card numbers.</li>
+  </ul>
+
+  <h2>Why we process it</h2>
+  <p>
+    To provide the portal (contract performance), to keep it secure and meet
+    legal obligations (legitimate interest / legal obligation), and — only with
+    your explicit consent — to send product updates.
+  </p>
+
+  <h2>Retention</h2>
+  <p>
+    Account data is kept while your account is active. Audit-log entries are
+    retained for compliance even after an account is deleted, but are
+    disassociated from your identifying details.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    You can <strong>access and export</strong> your data, <strong>rectify</strong> it,
+    and <strong>erase</strong> your account at any time from
+    <a href="/app/account/privacy">Data &amp; privacy</a> in your account
+    settings. You may also withdraw marketing consent there. To exercise any
+    other right, contact <a href="mailto:privacy@example.com">privacy@example.com</a>.
+  </p>
+
+  <h2>Sub-processors</h2>
+  <p>
+    We use Stripe (payments) and our hosting and email-delivery providers.
+    Each processes data only on our instructions.
+  </p>
+
+  <p>See also our <a href="/cookies">Cookie Policy</a> and <a href="/terms">Terms of Service</a>.</p>
+</article>
+{% endblock %}

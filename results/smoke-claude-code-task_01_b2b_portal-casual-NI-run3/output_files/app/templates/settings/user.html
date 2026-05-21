@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Settings — Acme Portal{% endblock %}
+{% block content %}
+<h1>Your settings</h1>
+{% if auth.can_manage %}
+<p class="muted"><a href="/settings/organization">Organization settings &rarr;</a></p>
+{% endif %}
+
+<div class="card">
+  <h2>Profile</h2>
+  <form method="post" action="/settings/profile">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Email</label>
+    <input type="email" value="{{ auth.user.email }}" disabled>
+    <p class="hint">Contact support to change your email address.</p>
+    <label for="full_name">Full name</label>
+    <input id="full_name" type="text" name="full_name" value="{{ auth.user.full_name }}"
+           required maxlength="120">
+    <div class="checkbox-row">
+      <input id="marketing_consent" type="checkbox" name="marketing_consent" value="true"
+             {{ "checked" if auth.user.marketing_consent }}>
+      <label for="marketing_consent">Receive occasional product updates.</label>
+    </div>
+    <p style="margin-top:14px"><button type="submit" class="btn btn-primary">Save profile</button></p>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Password</h2>
+  {% if auth.user.has_password %}
+  <form method="post" action="/settings/password">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="current_password">Current password</label>
+    <input id="current_password" type="password" name="current_password" required
+           autocomplete="current-password">
+    <label for="new_password">New password</label>
+    <input id="new_password" type="password" name="new_password" required
+           autocomplete="new-password" minlength="10">
+    <p class="hint">Changing your password signs out every other session.</p>
+    <p style="margin-top:14px"><button type="submit" class="btn btn-primary">Change password</button></p>
+  </form>
+  {% else %}
+  <p class="muted">Your account signs in via SSO and has no local password.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Active sessions</h2>
+  <table>
+    <thead><tr><th>Started</th><th>IP address</th><th>Device</th><th></th></tr></thead>
+    <tbody>
+      {% for s in sessions %}
+      <tr>
+        <td class="muted">{{ s.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+        <td class="muted">{{ s.ip_address or "—" }}</td>
+        <td class="muted" title="{{ s.user_agent or '' }}">
+          {{ (s.user_agent or "Unknown")[:40] }}
+        </td>
+        <td>{% if s.id == current_session_id %}<span class="badge">This device</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <form method="post" action="/settings/sessions/revoke-others" style="margin-top:12px">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn btn-ghost btn-sm">Sign out all other sessions</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Privacy &amp; your data</h2>
+  <p class="muted">Export your personal data or delete your account.</p>
+  <p><a href="/gdpr" class="btn btn-ghost btn-sm">Manage data &amp; privacy</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy — Acme Portal{% endblock %}
+{% block content %}
+<h1>Privacy Policy</h1>
+<p class="muted">Last updated: 2026-05-19. This is a template — review with counsel before production use.</p>
+
+<div class="card">
+  <h2>1. Who we are</h2>
+  <p>
+    Acme Portal ("we", "us") provides a B2B SaaS portal. We act as a data
+    processor for content your organization stores, and as a data controller for
+    account and billing data.
+  </p>
+
+  <h2>2. Data we collect</h2>
+  <ul>
+    <li><strong>Account data:</strong> name, email, hashed password, organization membership.</li>
+    <li><strong>Usage data:</strong> sign-in timestamps, IP address, and user agent, recorded in the audit log.</li>
+    <li><strong>Billing data:</strong> plan and subscription status. Card details are handled solely by Stripe; we never see or store them.</li>
+  </ul>
+
+  <h2>3. How we use it</h2>
+  <p>
+    To operate the service, authenticate you, secure your account, prevent abuse,
+    process payments, and meet legal obligations. We send transactional email
+    (security, billing, invitations). Marketing email is sent only with your
+    explicit, separately-given consent.
+  </p>
+
+  <h2>4. Cookies</h2>
+  <p>
+    We set one strictly-necessary cookie that keeps you signed in and protects
+    forms against CSRF. We do not set advertising or analytics cookies. The
+    consent banner records your choice in a further functional cookie.
+  </p>
+
+  <h2>5. Legal basis (GDPR)</h2>
+  <p>
+    Performance of a contract (providing the service), legitimate interests
+    (security and abuse prevention), consent (marketing email), and legal
+    obligation (tax and accounting records).
+  </p>
+
+  <h2>6. Your rights</h2>
+  <p>
+    You can access, export, correct, and delete your personal data. Use
+    <a href="/gdpr">Data &amp; privacy</a> to download a full export or to delete
+    your account. You may also lodge a complaint with your data protection
+    authority.
+  </p>
+
+  <h2>7. Retention</h2>
+  <p>
+    Account data is kept while your account is active. Audit records are retained
+    for security and compliance and may outlive an account in anonymized form.
+    Deleting your account removes your personal data, subject to legal retention
+    requirements.
+  </p>
+
+  <h2>8. Sub-processors</h2>
+  <p>
+    Stripe (payments) and our email delivery provider. Each processes data only
+    as needed to provide their service.
+  </p>
+
+  <h2>9. Contact</h2>
+  <p>Privacy questions: <a href="mailto:privacy@acme.example">privacy@acme.example</a>.</p>
+</div>
+{% endblock %}

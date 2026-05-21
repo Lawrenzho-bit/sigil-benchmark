@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Invitation — Acme Portal{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card center">
+    <h1>Invitation unavailable</h1>
+    <p class="muted">
+      This invitation link is invalid, has already been used, or has expired.
+      Ask an administrator to send a new one.
+    </p>
+    <p><a href="/auth/login" class="btn btn-ghost">Go to sign in</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Create your organization — Acme Portal{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Create your organization</h1>
+    <p class="muted">You'll be the owner — you can invite your team next.</p>
+    <form method="post" action="/auth/signup">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="organization_name">Organization name</label>
+      <input id="organization_name" type="text" name="organization_name" required maxlength="120">
+      <label for="full_name">Your name</label>
+      <input id="full_name" type="text" name="full_name" required maxlength="120">
+      <label for="email">Work email</label>
+      <input id="email" type="email" name="email" required autocomplete="email"
+             value="{{ (form.email if form else '') }}">
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" required
+             autocomplete="new-password" minlength="10">
+      <p class="hint">At least 10 characters.</p>
+      <div class="checkbox-row">
+        <input id="marketing_consent" type="checkbox" name="marketing_consent" value="true">
+        <label for="marketing_consent">Send me occasional product updates (optional).</label>
+      </div>
+      <p style="margin-top:16px">
+        <button type="submit" class="btn btn-primary" style="width:100%">Create account</button>
+      </p>
+    </form>
+    <p class="hint">
+      By signing up you agree to our <a href="/legal/terms">Terms</a> and
+      <a href="/legal/privacy">Privacy Policy</a>.
+    </p>
+    <p class="center muted">Already have an account? <a href="/auth/login">Sign in</a></p>
+  </div>
+</div>
+{% endblock %}

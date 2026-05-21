@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Terms of Service — {{ app_name }}{% endblock %}
+
+{% block content %}
+<article class="card" style="max-width:760px;margin:1.5rem auto">
+  <h1>Terms of Service</h1>
+  <p class="muted">Last updated: 19 May 2026</p>
+
+  <h2>1. Agreement</h2>
+  <p>
+    By creating an account or using {{ app_name }} you agree to these terms. If
+    you use the portal on behalf of an organization, you confirm you are
+    authorised to bind that organization.
+  </p>
+
+  <h2>2. Accounts &amp; roles</h2>
+  <p>
+    You are responsible for activity under your account and for keeping your
+    credentials secure. Organization owners control roles and access for their
+    members.
+  </p>
+
+  <h2>3. Acceptable use</h2>
+  <p>
+    You must not misuse the service, attempt to breach its security, or use it
+    to store or transmit unlawful content.
+  </p>
+
+  <h2>4. Billing</h2>
+  <p>
+    Paid plans are billed in advance through Stripe. Upgrades take effect
+    immediately with proration; downgrades and cancellations take effect at the
+    end of the current billing period. Fees already paid are non-refundable
+    except where required by law.
+  </p>
+
+  <h2>5. Availability &amp; liability</h2>
+  <p>
+    The service is provided "as is". To the extent permitted by law, our
+    liability is limited to the fees you paid in the previous twelve months.
+  </p>
+
+  <h2>6. Termination</h2>
+  <p>
+    You may stop using the service and delete your account at any time. We may
+    suspend accounts that violate these terms.
+  </p>
+
+  <h2>7. Changes</h2>
+  <p>
+    We may update these terms; material changes will be communicated in
+    advance. Continued use after changes take effect constitutes acceptance.
+  </p>
+
+  <p>Questions? Contact <a href="mailto:legal@example.com">legal@example.com</a>.</p>
+</article>
+{% endblock %}

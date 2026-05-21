@@ -1,0 +1,138 @@
+{
+  "results_dir": "smoke-claude-code-task_01_b2b_portal-terse-NI-run4",
+  "files_scored": 45,
+  "dimension_score": 64.0,
+  "sub_components": [
+    {
+      "id": "qual_01_cyclomatic_complexity",
+      "name": "Cyclomatic complexity",
+      "score": 10.0,
+      "rubric": "avg<5, max<15",
+      "tool_used": "ast_or_regex_cc",
+      "findings": {
+        "function_count": 53,
+        "avg": 3.28,
+        "max": 11
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_02_duplication",
+      "name": "Code duplication",
+      "score": 10.0,
+      "rubric": "<2% duplicated",
+      "tool_used": "block_hashing",
+      "findings": {
+        "dup_ratio": 0.0,
+        "total_lines": 1516
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_03_function_size",
+      "name": "Function/method size",
+      "score": 4.0,
+      "rubric": "max_func<200, max_class<1000",
+      "tool_used": "ast_or_regex_size",
+      "findings": {
+        "max_function_lines": 131,
+        "max_class_lines": 0
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_04_documentation_coverage",
+      "name": "Documentation coverage",
+      "score": 4.0,
+      "rubric": "30-49%",
+      "tool_used": "ast_jsdoc",
+      "findings": {
+        "documented": 24,
+        "total": 55,
+        "ratio": 0.436
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_05_type_safety",
+      "name": "Type safety",
+      "score": 10.0,
+      "rubric": "TS strict",
+      "tool_used": "tsconfig_or_ast",
+      "findings": {
+        "ts_strict": true,
+        "py_typed": 0,
+        "py_total": 0
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_06_test_coverage",
+      "name": "Test coverage (proxy)",
+      "score": 0.0,
+      "rubric": "no tests",
+      "tool_used": "static_proxy",
+      "findings": {
+        "src_loc": 1741,
+        "test_loc": 0,
+        "test_funcs": 0,
+        "tests_src_ratio": 0.0,
+        "has_test_config": false
+      },
+      "notes": "Static proxy. Real coverage + mutation testing requires execution."
+    },
+    {
+      "id": "qual_07_linter_compliance",
+      "name": "Linter compliance (proxy)",
+      "score": 8.0,
+      "rubric": "1-5 per 1k",
+      "tool_used": "smell_density",
+      "findings": {
+        "warnings": 5,
+        "total_lines": 1741,
+        "density_per_1k": 2.87
+      },
+      "notes": "Proxy via code-smell pattern density. Real linter run requires installation."
+    },
+    {
+      "id": "qual_08_naming_consistency",
+      "name": "Naming convention consistency",
+      "score": 8.0,
+      "rubric": "85-94%",
+      "tool_used": "regex_naming",
+      "findings": {
+        "conformant": 174,
+        "total": 187,
+        "conformance": 0.93
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_09_module_structure",
+      "name": "Module structure / separation of concerns",
+      "score": 10.0,
+      "rubric": "5+ concerns separated, deep structure",
+      "tool_used": "directory_signal_heuristic",
+      "findings": {
+        "concern_signals_detected": [
+          "/api/",
+          "/auth/",
+          "/components/",
+          "/lib/",
+          "/types/"
+        ],
+        "max_depth": 6
+      },
+      "notes": null
+    },
+    {
+      "id": "qual_10_dead_code",
+      "name": "Dead code / unused imports",
+      "score": 0.0,
+      "rubric": null,
+      "tool_used": "ast_import_check",
+      "findings": {},
+      "notes": "No Python code (other langs not yet supported)"
+    }
+  ]
+}

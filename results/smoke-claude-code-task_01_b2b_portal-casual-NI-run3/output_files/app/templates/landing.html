@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Acme Portal — B2B SaaS{% endblock %}
+{% block content %}
+<section class="card center">
+  <h1>The portal your customers actually log into.</h1>
+  <p class="muted">
+    Team management, SSO, billing, and audit logging — production-ready from day one.
+  </p>
+  <p>
+    <a href="/auth/signup" class="btn btn-primary">Create your organization</a>
+    <a href="/auth/login" class="btn btn-ghost">Sign in</a>
+  </p>
+</section>
+
+<h2>Plans</h2>
+<div class="pricing">
+  {% for plan in plans %}
+  <div class="plan-card">
+    <h3>{{ plan.label }}</h3>
+    <p class="plan-price">${{ plan.price }}<span class="muted" style="font-size:14px">/mo</span></p>
+    <p class="muted">Up to {{ plan.seats }} seats</p>
+  </div>
+  {% endfor %}
+</div>
+<p class="hint">Prices shown for reference; checkout and invoices are handled securely by Stripe.</p>
+{% endblock %}

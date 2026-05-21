@@ -1,0 +1,43 @@
+{# Layout for authenticated, in-app pages: adds the left navigation sidebar.
+   The active link is derived from the request path, and links are filtered by
+   the active role's permissions. #}
+{% extends "base.html" %}
+
+{% set path = request.url.path %}
+
+{% block content %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <nav>
+      <a href="/app/dashboard"
+         class="{{ 'active' if path == '/app/dashboard' }}">Dashboard</a>
+      {% if auth.can(Permission.MEMBERS_VIEW) %}
+      <a href="/app/members"
+         class="{{ 'active' if path.startswith('/app/members') }}">Members</a>
+      {% endif %}
+      {% if auth.can(Permission.BILLING_VIEW) %}
+      <a href="/app/billing"
+         class="{{ 'active' if path.startswith('/app/billing') }}">Billing</a>
+      {% endif %}
+      {% if auth.can(Permission.AUDIT_VIEW) %}
+      <a href="/app/audit"
+         class="{{ 'active' if path.startswith('/app/audit') }}">Audit log</a>
+      {% endif %}
+      {% if auth.can(Permission.ORG_VIEW) %}
+      <a href="/app/settings"
+         class="{{ 'active' if path.startswith('/app/settings') }}">Organization</a>
+      {% endif %}
+    </nav>
+    <nav class="sidebar-secondary">
+      <a href="/app/account"
+         class="{{ 'active' if path == '/app/account' }}">My account</a>
+      <a href="/app/account/privacy"
+         class="{{ 'active' if path.startswith('/app/account/privacy') }}">Data &amp; privacy</a>
+    </nav>
+  </aside>
+
+  <section class="app-content">
+    {% block app_content %}{% endblock %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: marketplace
+      POSTGRES_PASSWORD: marketplace
+      POSTGRES_DB: marketplace
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketplace"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # S3-compatible object storage for listing photos
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  # Creates the bucket on first boot
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin; do sleep 2; done;
+      /usr/bin/mc mb --ignore-existing local/marketplace-listings;
+      /usr/bin/mc anonymous set download local/marketplace-listings;
+      exit 0;
+      "
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://marketplace:marketplace@db:5432/marketplace?schema=public
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_BASE_URL: http://localhost:9000/marketplace-listings
+    env_file:
+      - .env
+    ports:
+      - "4000:4000"
+
+  payout-worker:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://marketplace:marketplace@db:5432/marketplace?schema=public
+    env_file:
+      - .env
+    command: ["sh", "-c", "npx prisma migrate deploy && node dist/workers/payoutWorker.js"]
+
+volumes:
+  db_data:
+  minio_data:

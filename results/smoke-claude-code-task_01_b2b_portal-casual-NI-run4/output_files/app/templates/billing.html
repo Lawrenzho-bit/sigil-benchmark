@@ -1,0 +1,96 @@
+{% extends "app_base.html" %}
+{% block title %}Billing — {{ app_name }}{% endblock %}
+
+{% block app_content %}
+<div class="page-head"><h1>Billing</h1></div>
+
+{% if checkout_status == 'success' %}
+<div class="alert" style="background:var(--ok-bg);color:var(--ok)">
+  Payment received — your subscription is being activated. It will update here
+  once Stripe confirms.
+</div>
+{% elif checkout_status == 'cancel' %}
+<div class="alert alert-warn">Checkout was cancelled. No charge was made.</div>
+{% endif %}
+
+{% set has_live_sub = subscription and subscription.stripe_subscription_id
+                       and subscription.is_live %}
+
+<div class="card">
+  <h2 class="card-title">Current subscription</h2>
+  {% if subscription %}
+  <table>
+    <tbody>
+      <tr><td>Plan</td><td><strong>{{ subscription.plan.label }}</strong>
+        — ${{ subscription.plan.monthly_price_usd }}/mo, {{ subscription.seats }} seats</td></tr>
+      <tr><td>Status</td><td>
+        {% set s = subscription.status.value %}
+        <span class="badge {{ 'badge-ok' if has_live_sub and s != 'past_due'
+          else 'badge-err' if s in ('past_due','canceled') else 'badge-warn' }}">
+          {{ s | replace('_',' ') }}</span>
+      </td></tr>
+      <tr><td>Current period ends</td><td class="muted">
+        {{ subscription.current_period_end.strftime('%d %b %Y')
+           if subscription.current_period_end else '—' }}</td></tr>
+      {% if subscription.cancel_at_period_end %}
+      <tr><td>Renewal</td><td class="badge badge-warn">Cancels at period end</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No subscription on file.</p>
+  {% endif %}
+
+  {% if can_manage and has_live_sub %}
+  <div style="display:flex; gap:0.5rem; margin-top:1rem">
+    <form method="post" action="/app/billing/portal" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn btn-ghost btn-sm">Manage payment details</button>
+    </form>
+    {% if not subscription.cancel_at_period_end %}
+    <form method="post" action="/app/billing/cancel" class="inline-form"
+          data-confirm="Cancel the subscription at the end of the period?">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn btn-danger btn-sm">Cancel subscription</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2 class="card-title">{{ 'Change plan' if has_live_sub else 'Choose a plan' }}</h2>
+  {% if not can_manage %}
+  <p class="muted">Only an owner can change the organization's plan.</p>
+  {% endif %}
+  <div class="plan-grid">
+    {% for plan in plans %}
+    {% set is_current = subscription and subscription.plan == plan %}
+    <div class="card plan {{ 'is-current' if is_current }}">
+      <h3>{{ plan.label }}</h3>
+      <div class="price">${{ plan.monthly_price_usd }}<span class="muted"
+        style="font-size:.85rem">/mo</span></div>
+      <p class="muted">Up to {{ plan.seats }} seats</p>
+      {% if can_manage %}
+        {% if is_current and has_live_sub %}
+          <button class="btn btn-ghost btn-block" disabled>Current plan</button>
+        {% elif has_live_sub %}
+          <form method="post" action="/app/billing/change-plan">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="plan" value="{{ plan.value }}">
+            <button type="submit" class="btn btn-primary btn-block">
+              Switch to {{ plan.label }}</button>
+          </form>
+        {% else %}
+          <form method="post" action="/app/billing/checkout">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="plan" value="{{ plan.value }}">
+            <button type="submit" class="btn btn-primary btn-block">Choose {{ plan.label }}</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

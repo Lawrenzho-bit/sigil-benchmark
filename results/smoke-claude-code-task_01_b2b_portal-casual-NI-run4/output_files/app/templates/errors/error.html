@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Error {{ status_code }} — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card" style="text-align:center">
+    <h1>{{ status_code }}</h1>
+    <p class="muted">{{ message }}</p>
+    <a href="/" class="btn btn-primary">Back to safety</a>
+  </div>
+</div>
+{% endblock %}

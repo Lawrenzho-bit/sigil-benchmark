@@ -1,0 +1,222 @@
+// B2B SaaS Portal — data model.
+// Migrations live in prisma/migrations; generate them with `prisma migrate dev`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  VIEWER
+}
+
+enum Plan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum UserStatus {
+  ACTIVE
+  DEACTIVATED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+}
+
+// --- Tenancy ---------------------------------------------------------------
+
+model Organization {
+  id                  String             @id @default(cuid())
+  name                String
+  // Email domain used for SSO routing / auto-join. Unique when set.
+  domain              String?            @unique
+  brandingLogoUrl     String?
+  brandingColor       String?
+  defaultRole         Role               @default(VIEWER)
+  // Audit retention in years; configurable per org (default 7 for SOC2).
+  auditRetentionYears Int                @default(7)
+
+  // Billing
+  plan                Plan               @default(STARTER)
+  subscriptionStatus  SubscriptionStatus @default(INCOMPLETE)
+  stripeCustomerId    String?            @unique
+  stripeSubscriptionId String?           @unique
+  currentPeriodEnd    DateTime?
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  users         User[]
+  invitations   Invitation[]
+  auditLogs     AuditLog[]
+  samlConnection SamlConnection?
+}
+
+// --- Identity --------------------------------------------------------------
+
+model User {
+  id             String     @id @default(cuid())
+  orgId          String
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  email          String
+  // Argon2id hash. Null for SSO-only users who never set a password.
+  passwordHash   String?
+  name           String?
+  role           Role       @default(VIEWER)
+  status         UserStatus @default(ACTIVE)
+
+  // MFA — totpSecret is encrypted at rest (see src/lib/crypto.ts).
+  mfaEnabled     Boolean    @default(false)
+  totpSecret     String?
+
+  emailVerifiedAt DateTime?
+  lastLoginAt     DateTime?
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  sessions       Session[]
+  apiTokens      ApiToken[]
+  passwordResets PasswordResetToken[]
+  auditLogs      AuditLog[] @relation("ActorAuditLogs")
+
+  // Email is unique within an organization, not globally — the same person
+  // may belong to multiple orgs with separate accounts.
+  @@unique([orgId, email])
+  @@index([orgId, status])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // SHA-256 hash of the session token; the raw token is only in the cookie.
+  tokenHash  String   @unique
+  ip         String?
+  userAgent  String?
+  // Absolute expiry. Idle timeout is enforced against lastActiveAt in code.
+  expiresAt  DateTime
+  lastActiveAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Invitation {
+  id          String   @id @default(cuid())
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  email       String
+  role        Role     @default(VIEWER)
+  tokenHash   String   @unique
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([orgId, email])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ApiToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  // SHA-256 hash of the token. Raw value shown once at creation time.
+  tokenHash  String   @unique
+  prefix     String   // first 8 chars, shown in UI for identification
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SamlConnection {
+  id           String   @id @default(cuid())
+  orgId        String   @unique
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  idpEntityId  String
+  idpSsoUrl    String
+  idpCert      String   @db.Text
+  // SP private key, encrypted at rest.
+  spPrivateKey String?  @db.Text
+  enabled      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --- Audit (append-only) ---------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  // Actor is denormalized (id + email) so the record survives user deletion.
+  actorId    String?
+  actor      User?    @relation("ActorAuditLogs", fields: [actorId], references: [id], onDelete: SetNull)
+  actorEmail String
+
+  action     String   // e.g. "user.invited", "role.changed", "billing.upgraded"
+  targetType String?  // e.g. "user", "organization", "subscription"
+  targetId   String?
+  ip         String?
+  // Before/after state where applicable.
+  diff       Json?
+  metadata   Json?
+
+  createdAt  DateTime @default(now())
+
+  @@index([orgId, createdAt])
+  @@index([orgId, action])
+}
+
+// --- Stripe webhook idempotency -------------------------------------------
+
+model WebhookEvent {
+  // Stripe event id (evt_...). Primary key gives us idempotency for free.
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+}
+
+// --- Rate limiting (DB-backed; swap for Redis at higher scale) ------------
+
+model RateLimitBucket {
+  // Composite key: "<scope>:<identifier>" e.g. "login:203.0.113.4"
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+
+  @@index([windowStart])
+}

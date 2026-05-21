@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sign in — Acme Portal{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Sign in</h1>
+    <form method="post" action="/auth/login">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="next" value="{{ next }}">
+      <label for="email">Work email</label>
+      <input id="email" type="email" name="email" required autocomplete="email" autofocus>
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" required autocomplete="current-password">
+      <p style="margin-top:16px">
+        <button type="submit" class="btn btn-primary" style="width:100%">Sign in</button>
+      </p>
+    </form>
+    <p class="center muted"><a href="/auth/forgot">Forgot your password?</a></p>
+    <hr>
+    <p class="center muted">
+      Single sign-on? <a href="/sso/metadata">Use your company SSO</a>
+    </p>
+    <p class="center muted">No account? <a href="/auth/signup">Create one</a></p>
+  </div>
+</div>
+{% endblock %}

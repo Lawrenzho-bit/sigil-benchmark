@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Choose a new password — Acme Portal{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Choose a new password</h1>
+    <form method="post" action="/auth/reset">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="token" value="{{ token }}">
+      <label for="password">New password</label>
+      <input id="password" type="password" name="password" required
+             autocomplete="new-password" minlength="10" autofocus>
+      <p class="hint">At least 10 characters. All other sessions will be signed out.</p>
+      <p style="margin-top:16px">
+        <button type="submit" class="btn btn-primary" style="width:100%">Update password</button>
+      </p>
+    </form>
+  </div>
+</div>
+{% endblock %}

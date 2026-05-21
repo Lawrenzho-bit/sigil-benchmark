@@ -1,0 +1,121 @@
+{% extends "app_base.html" %}
+{% block title %}Dashboard — {{ app_name }}{% endblock %}
+
+{% block app_content %}
+<div class="page-head">
+  <h1>Dashboard</h1>
+  {% if memberships | length > 1 %}
+  <form method="post" action="/app/switch-organization" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <select name="organization_id" onchange="this.form.submit()">
+      {% for m in memberships %}
+      <option value="{{ m.organization_id }}"
+        {{ 'selected' if m.organization_id == organization.id }}>
+        {{ m.organization.name }}
+      </option>
+      {% endfor %}
+    </select>
+    <noscript><button class="btn btn-sm btn-ghost">Switch</button></noscript>
+  </form>
+  {% endif %}
+</div>
+
+{% if not current_user.is_email_verified %}
+<div class="alert alert-warn">
+  Your email address isn't verified yet. Check your inbox for the verification
+  link.
+</div>
+{% endif %}
+
+{% if subscription and subscription.status.value == 'past_due' %}
+<div class="alert alert-err">
+  Your last payment failed. Please update your billing details on the
+  <a href="/app/billing">billing page</a>.
+</div>
+{% endif %}
+
+<div class="grid grid-4">
+  <div class="metric">
+    <div class="value">{{ metrics.member_count }}</div>
+    <div class="label">Members</div>
+  </div>
+  <div class="metric">
+    <div class="value">{{ metrics.seats_used }}/{{ metrics.seats_allowed }}</div>
+    <div class="label">Seats used ({{ metrics.seat_utilisation }}%)</div>
+  </div>
+  <div class="metric">
+    <div class="value">{{ metrics.active_sessions }}</div>
+    <div class="label">Active sessions</div>
+  </div>
+  <div class="metric">
+    <div class="value">{{ metrics.pending_invitations }}</div>
+    <div class="label">Pending invites</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2 class="card-title">Activity — last 14 days</h2>
+    {% set counts = metrics.activity_trend | map('last') | list %}
+    {% set peak = (counts | max) or 1 %}
+    <div class="spark">
+      {% for label, count in metrics.activity_trend %}
+      <div class="bar" title="{{ label }}: {{ count }} events"
+           style="height: {{ ((count / peak) * 100) | round | int }}%"></div>
+      {% endfor %}
+    </div>
+    <p class="hint">
+      {{ metrics.events_last_30d }} usage events &middot;
+      {{ metrics.audit_entries_last_30d }} audit entries (30 days)
+    </p>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Team composition</h2>
+    <table>
+      <tbody>
+        {% for role_label, count in metrics.role_breakdown.items() %}
+        <tr>
+          <td><span class="badge badge-{{ role_label | lower }}">{{ role_label }}</span></td>
+          <td class="muted">{{ count }} member{{ '' if count == 1 else 's' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2 class="card-title">Subscription</h2>
+  {% if subscription %}
+  <table>
+    <tbody>
+      <tr><td>Plan</td><td><strong>{{ subscription.plan.label }}</strong></td></tr>
+      <tr>
+        <td>Status</td>
+        <td>
+          {% set s = subscription.status.value %}
+          <span class="badge {{ 'badge-ok' if subscription.is_live and s != 'past_due'
+            else 'badge-err' if s in ('past_due','canceled') else 'badge-warn' }}">
+            {{ s | replace('_',' ') }}
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>Renews</td>
+        <td class="muted">
+          {{ subscription.current_period_end.strftime('%d %b %Y')
+             if subscription.current_period_end else '—' }}
+          {% if subscription.cancel_at_period_end %}(cancels at period end){% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  {% if auth.can(Permission.BILLING_MANAGE) %}
+  <p style="margin-top:1rem"><a href="/app/billing" class="btn btn-ghost btn-sm">Manage billing</a></p>
+  {% endif %}
+  {% else %}
+  <p class="muted">No subscription yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

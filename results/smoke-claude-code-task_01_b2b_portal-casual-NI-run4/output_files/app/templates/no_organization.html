@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Create an organization — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Create an organization</h1>
+    <p class="muted">
+      You aren't a member of any organization yet. Create one to get started —
+      you'll become its owner.
+    </p>
+    <form method="post" action="/app/organizations">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="organization_name">Organization name</label>
+        <input type="text" id="organization_name" name="organization_name"
+               required maxlength="120" autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Create organization</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

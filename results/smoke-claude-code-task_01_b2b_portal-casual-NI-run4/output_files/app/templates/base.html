@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <meta name="description" content="Sigil Portal — the B2B customer portal.">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>◆</text></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% if auth %}/app/dashboard{% else %}/{% endif %}">◆ {{ app_name }}</a>
+    <nav class="topnav">
+      {% if auth %}
+        <span class="topnav-org">{{ organization.name if organization else 'No organization' }}</span>
+        <a href="/app/account">{{ current_user.full_name }}</a>
+        <form method="post" action="/auth/logout" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
+        </form>
+      {% else %}
+        <a href="/auth/login">Sign in</a>
+        <a href="/auth/signup" class="btn btn-primary btn-sm">Get started</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if flash %}
+    <div class="flash flash-{{ flash.level }}" role="status">{{ flash.message }}</div>
+  {% endif %}
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <span>&copy; {{ current_year }} {{ app_name }}</span>
+    <nav>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/cookies">Cookies</a>
+    </nav>
+  </footer>
+
+  <!-- Cookie consent. The portal sets only strictly-necessary cookies
+       (session, CSRF, flash); this banner informs the user per GDPR/ePrivacy. -->
+  <div id="cookie-banner" class="cookie-banner" hidden>
+    <p>
+      We use only essential cookies needed to sign you in and keep the portal
+      secure. See our <a href="/cookies">Cookie Policy</a>.
+    </p>
+    <div class="cookie-actions">
+      <button type="button" class="btn btn-sm btn-ghost" data-cookie-action="reject">
+        Reject non-essential
+      </button>
+      <button type="button" class="btn btn-sm btn-primary" data-cookie-action="accept">
+        Accept
+      </button>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js" defer></script>
+</body>
+</html>

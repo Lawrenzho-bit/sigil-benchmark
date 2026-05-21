@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Data &amp; privacy — Acme Portal{% endblock %}
+{% block content %}
+<h1>Data &amp; privacy</h1>
+<p class="muted">Your rights under the GDPR and similar regulations.</p>
+
+<div class="card">
+  <h2>Export your data</h2>
+  <p class="muted">
+    Download everything we hold about you — account details, organization
+    memberships, and your recent activity — as a JSON file.
+  </p>
+  <p><a href="/gdpr/export" class="btn btn-ghost">Download my data (JSON)</a></p>
+</div>
+
+<div class="card">
+  <h2>Delete your account</h2>
+  <p class="muted">
+    This permanently removes your account and personal data. If you are the sole
+    owner of an organization, that organization and its data are deleted too.
+    This cannot be undone.
+  </p>
+  <form method="post" action="/gdpr/delete-account"
+        data-confirm="Permanently delete your account? This cannot be undone.">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% if has_password %}
+    <label for="password">Confirm your password</label>
+    <input id="password" type="password" name="password" required autocomplete="current-password">
+    {% endif %}
+    <label for="confirm">Type <strong>DELETE</strong> to confirm</label>
+    <input id="confirm" type="text" name="confirm" required placeholder="DELETE">
+    <p style="margin-top:14px">
+      <button type="submit" class="btn btn-danger">Delete my account</button>
+    </p>
+  </form>
+</div>
+{% endblock %}

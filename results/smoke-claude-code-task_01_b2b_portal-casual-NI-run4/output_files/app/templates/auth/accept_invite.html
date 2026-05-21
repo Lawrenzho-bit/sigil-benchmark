@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Accept invitation — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Join {{ organization.name }}</h1>
+    <p class="muted">
+      You've been invited to join <strong>{{ organization.name }}</strong> as
+      <span class="badge badge-{{ invitation.role.value }}">{{ invitation.role.label }}</span>.
+      The invitation was sent to <strong>{{ invitation.email }}</strong>.
+    </p>
+
+    <form method="post" action="/auth/accept-invite">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="token" value="{{ token }}">
+
+      {% if needs_account %}
+        {# New user — collect a name and password to create the account. #}
+        <div class="field">
+          <label for="full_name">Your name</label>
+          <input type="text" id="full_name" name="full_name" required
+                 maxlength="120" autofocus>
+        </div>
+        <div class="field">
+          <label for="password">Choose a password</label>
+          <input type="password" id="password" name="password" required
+                 minlength="10" autocomplete="new-password">
+          <p class="hint">At least 10 characters, with letters and numbers.</p>
+        </div>
+        <div class="field">
+          <label class="checkbox">
+            <input type="checkbox" name="marketing_consent" value="true">
+            <span>Send me occasional product updates. (Optional.)</span>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          Create account &amp; join
+        </button>
+      {% elif auth and not email_matches %}
+        <div class="alert alert-warn">
+          You are signed in as {{ current_user.email }}, but this invitation is
+          for {{ invitation.email }}. Sign out and use the right account.
+        </div>
+      {% else %}
+        <button type="submit" class="btn btn-primary btn-block">
+          Accept invitation
+        </button>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -12,6 +12,8 @@ The scores below are **preliminary data points** for methodology validation. The
 
 Do not cite as authoritative.
 
+**Cost basis (transparency):** ~30 `claude -p` invocations collected on the project maintainer's Claude Code subscription over 2026-05-19 to 2026-05-21, estimated quota cost ~\$50–75. Future cycles run under TSC budget approval will report cost per condition.
+
 ---
 
 ## Preliminary Observations (single-tool single-day pilot, 2026-05-19 to 2026-05-21)
@@ -77,7 +79,16 @@ Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent s
 | 01 — B2B Portal (terse) | no-NI | — | — | — | — | — | — | — | 0 | 52s | 4 | silent_decline |
 | 01 — B2B Portal (terse) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
 | 01 — B2B Portal (terse) | +NI | — | — | — | — | — | — | — | 0 | 44s | 2 | silent_decline |
-| 01 — B2B Portal (terse) | +NI | **218.0** ← high | 20 | 40 | 60 | 34 | 64 | **60** | 77 | ~10m gen | 3 | **complete (highest PRS scored)** |
+| 01 — B2B Portal (terse) | +NI | **218.0** | 20 | 40 | 60 | 34 | 64 | **60** | 77 | ~10m gen | 3 | complete |
+| 01 — B2B Portal (terse) | +NI | **138.0** | 20 | 22 | 40 | 16 | 40 | **64** | 45 | timeout-killed | 4 | partial_complete |
+| 01 — B2B Portal (verbose) | +NI | **230.0** | 20 | 40 | 70 | 40 | 60 | **74** | 62 | timeout-killed | 2 | partial_complete |
+| 01 — B2B Portal (casual) | +NI | **208.0** | 18 | 36 | 56 | 36 | 62 | **74** | 86 | timeout-killed | 3 | partial_complete |
+| 01 — B2B Portal (casual) | +NI | **230.0** | 20 | 32 | 70 | 50 | 58 | **68** | 94 | timeout-killed | 4 | partial_complete |
+| 02 — Admin Tool (terse) | +NI | **162.0** | 20 | 30 | 38 | 18 | 56 | **54** | 43 | timeout-killed | 5 | partial_complete |
+| 03 — Marketplace (terse) | +NI | **186.0** | 20 | 24 | 56 | 26 | 60 | **64** | 47 | timeout-killed | 5 | partial_complete |
+| 04 — Customer Support (terse) | +NI | **170.0** | 20 | 30 | 38 | 22 | 60 | **62** | 30 | timeout-killed | 5 | partial_complete |
+| 05 — Analytics (terse) | +NI | **117.0** | 20 | 14 | 40 | 12 | 31 | **0** | 13 | partial_complete | 1 | first T05 run |
+| 05 — Analytics (terse) | +NI | **161.0** | 20 | 22 | 40 | 14 | 65 | **78** | 20 | timeout-killed | 2 | partial_complete |
 | 01 — B2B Portal (verbose) | no-NI | — | — | — | — | — | — | — | 0 | 45s | 1 | silent_decline |
 | 01 — B2B Portal (verbose) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
 | 01 — B2B Portal (casual) | no-NI | — | — | — | — | — | — | — | 0 | 41s | 1 | silent_decline |
@@ -127,18 +138,18 @@ The 23 runs above, classified per the [RFC 0004](rfcs/0004-failure-mode-index.md
 
 | Tool | Task | Variant | NI | N | Completion | Constructive | Dominant Failure |
 |---|---|---|---|---|---|---|---|
-| claude-code | T01 b2b_portal | terse | no | 4 | 25% | 25% | silent_decline |
-| claude-code | T01 b2b_portal | terse | yes | 3 | 33% | 33% | silent_decline (the 1 success scored PRS 218 — highest in cycle) |
-| claude-code | T01 b2b_portal | verbose | no | 1 | 0% | 0% | silent_decline |
-| claude-code | T01 b2b_portal | verbose | yes | 1 | 0% | 0% | silent_decline |
-| claude-code | T01 b2b_portal | casual | no | 1 | 0% | 0% | silent_decline |
-| claude-code | T01 b2b_portal | casual | yes | 1 | **100%** | 100% | — |
-| claude-code | T02 admin_tool | terse | no | 3 | 0% | 0% | silent_decline (1× attempted_abort) |
-| claude-code | T02 admin_tool | terse | yes | 1 | **100%** | 100% | — |
-| claude-code | T03 marketplace | terse | no | 2 | 0% | 50% | wrong_artifact |
-| claude-code | T03 marketplace | terse | yes | 4 | 50% | 100% | partial_complete (2 runs hit 60m timeout but scored PRS 163/198) |
-| claude-code | T04 support | terse | no | 4 | 25% | 25% | silent_decline |
-| claude-code | T04 support | terse | yes | 4 | 75% | 100% | partial_complete (run 4 hit 60m timeout but scored PRS 204, 2nd-highest in cycle) |
+| claude-code | T01 b2b_portal | terse | no | 1* | 100% | 100% | — | 155 |
+| claude-code | T01 b2b_portal | terse | yes | 2 | 100% | 100% | — | 218, 138 |
+| claude-code | T01 b2b_portal | verbose | yes | 1 | 100% | 100% | — | 230 |
+| claude-code | T01 b2b_portal | casual | yes | 4 | 100% | 100% | — | 167, 181, 208, 230 |
+| claude-code | T02 admin_tool | terse | yes | 5 | 80% | 80% | timeout | 156, 128, 146, 162 |
+| claude-code | T03 marketplace | terse | no | 1 | 0% | 100% | wrong_artifact | — |
+| claude-code | T03 marketplace | terse | yes | 5 | 100% | 100% | — | 138, 152, 163, 198, 186 |
+| claude-code | T04 support | terse | no | 1* | 100% | 100% | — | 156 |
+| claude-code | T04 support | terse | yes | 5 | 100% | 100% | — | 162, 164, 150, 204, 170 |
+| claude-code | T05 analytics | terse | yes | 2 | 100% | 100% | — | 117, 161 |
+
+\* The no-NI conditions show N=1 because earlier silent_decline runs left no on-disk record (the `failure_record.json` infrastructure was added 2026-05-21 in commit `dd4e1f5`, after those runs had already happened). The true N is ≥4 with 3 silent_declines per condition that the report can't see. Future cycles will have complete N tracking.
 
 **Aggregate read** (updated 2026-05-21 with later data): across the 12 conditions, completion rate is **0%** in 6 conditions, **25%-33%** in 3, and **100%** in 5 (excluding the partially-run T02 +NI which is at 75% after timeout in run 4). The all-or-nothing pattern is the dominant shape but not absolute — T01 terse +NI moved from 0% (N=2) to 33% (N=3) when the third run unexpectedly produced a 77-file build with PRS 218 (the highest score in the cycle). This argues against a strict discrete "ask vs build" internal state and toward a probabilistic distribution where some prompt/task combinations have much lower P(build) than others, but never zero. N=2 is unsafe; even N=3 can change the qualitative picture.
 

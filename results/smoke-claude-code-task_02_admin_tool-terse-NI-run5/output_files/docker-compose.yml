@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: admin_tool
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d admin_tool"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      DATABASE_URL: postgresql://admin:admin@db:5432/admin_tool?schema=public
+      SESSION_SECRET: ${SESSION_SECRET:-please-override-this-session-secret-in-env}
+      SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-480}
+      SUPER_ADMIN_EMAILS: ${SUPER_ADMIN_EMAILS:-}
+      SAML_ENABLED: ${SAML_ENABLED:-false}
+      SAML_ENTRY_POINT: ${SAML_ENTRY_POINT:-}
+      SAML_ISSUER: ${SAML_ISSUER:-internal-admin-tool}
+      SAML_IDP_CERT: ${SAML_IDP_CERT:-}
+      SAML_SP_PRIVATE_KEY: ${SAML_SP_PRIVATE_KEY:-}
+      SAML_SP_CERT: ${SAML_SP_CERT:-}
+      OIDC_ENABLED: ${OIDC_ENABLED:-false}
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      OIDC_SCOPE: ${OIDC_SCOPE:-openid profile email}
+      AUTH_DEV_MODE: ${AUTH_DEV_MODE:-false}
+      SEED_ON_START: ${SEED_ON_START:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:
