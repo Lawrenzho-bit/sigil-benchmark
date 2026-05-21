@@ -31,6 +31,7 @@ Generated 2026-05-19 to 2026-05-21. Static analysis only (deployment-dependent s
 | 01 — B2B Portal (terse) | no-NI | — | — | — | — | — | — | — | 0 | 52s | 4 | silent_decline |
 | 01 — B2B Portal (terse) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
 | 01 — B2B Portal (terse) | +NI | — | — | — | — | — | — | — | 0 | 44s | 2 | silent_decline |
+| 01 — B2B Portal (terse) | +NI | **218.0** ← high | 20 | 40 | 60 | 34 | 64 | **60** | 77 | ~10m gen | 3 | **complete (highest PRS scored)** |
 | 01 — B2B Portal (verbose) | no-NI | — | — | — | — | — | — | — | 0 | 45s | 1 | silent_decline |
 | 01 — B2B Portal (verbose) | +NI | — | — | — | — | — | — | — | 0 | 39s | 1 | silent_decline |
 | 01 — B2B Portal (casual) | no-NI | — | — | — | — | — | — | — | 0 | 41s | 1 | silent_decline |
@@ -78,7 +79,7 @@ The 23 runs above, classified per the [RFC 0004](rfcs/0004-failure-mode-index.md
 | Tool | Task | Variant | NI | N | Completion | Constructive | Dominant Failure |
 |---|---|---|---|---|---|---|---|
 | claude-code | T01 b2b_portal | terse | no | 4 | 25% | 25% | silent_decline |
-| claude-code | T01 b2b_portal | terse | yes | 2 | 0% | 0% | silent_decline |
+| claude-code | T01 b2b_portal | terse | yes | 3 | 33% | 33% | silent_decline (the 1 success scored PRS 218 — highest in cycle) |
 | claude-code | T01 b2b_portal | verbose | no | 1 | 0% | 0% | silent_decline |
 | claude-code | T01 b2b_portal | verbose | yes | 1 | 0% | 0% | silent_decline |
 | claude-code | T01 b2b_portal | casual | no | 1 | 0% | 0% | silent_decline |
@@ -90,7 +91,7 @@ The 23 runs above, classified per the [RFC 0004](rfcs/0004-failure-mode-index.md
 | claude-code | T04 support | terse | no | 4 | 25% | 25% | silent_decline |
 | claude-code | T04 support | terse | yes | 2 | **100%** | 100% | — |
 
-**Aggregate read**: across the 12 conditions, completion rate is **0%** in 7 conditions, **25%** in 2, and **100%** in 5. The bimodality is itself a finding — claude-code's agentic CLI behavior on a given (task, variant, NI) condition tends to be all-or-nothing, not stochastically continuous. This is consistent with the conversational-refusal mechanism: claude either decides up front to ask (→ silent_decline always) or to build (→ complete with the usual stochastic variance).
+**Aggregate read** (updated 2026-05-21 with later data): across the 12 conditions, completion rate is **0%** in 6 conditions, **25%-33%** in 3, and **100%** in 5 (excluding the partially-run T02 +NI which is at 75% after timeout in run 4). The all-or-nothing pattern is the dominant shape but not absolute — T01 terse +NI moved from 0% (N=2) to 33% (N=3) when the third run unexpectedly produced a 77-file build with PRS 218 (the highest score in the cycle). This argues against a strict discrete "ask vs build" internal state and toward a probabilistic distribution where some prompt/task combinations have much lower P(build) than others, but never zero. N=2 is unsafe; even N=3 can change the qualitative picture.
 
 The reference implementation validates 23 of 23 runs against the taxonomy specification.
 

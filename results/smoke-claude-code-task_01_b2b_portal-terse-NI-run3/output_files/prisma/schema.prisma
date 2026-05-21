@@ -1,0 +1,121 @@
+// B2B SaaS portal data model.
+// Multi-tenant: every row that matters is scoped to an Organization.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  DEACTIVATED
+}
+
+enum Plan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+model Organization {
+  id                   String        @id @default(cuid())
+  name                 String
+  slug                 String        @unique
+  // Billing
+  plan                 Plan          @default(STARTER)
+  subscriptionStatus   SubscriptionStatus @default(INCOMPLETE)
+  stripeCustomerId     String?       @unique
+  stripeSubscriptionId String?       @unique
+  currentPeriodEnd     DateTime?
+  // Org-level settings
+  timezone             String        @default("UTC")
+  ssoEnabled           Boolean       @default(false)
+  ssoEnforced          Boolean       @default(false)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  users        User[]
+  invitations  Invitation[]
+  auditLogs    AuditLog[]
+}
+
+model User {
+  id             String     @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  name           String
+  // Null for SSO-only users.
+  passwordHash   String?
+  role           Role       @default(VIEWER)
+  status         UserStatus @default(ACTIVE)
+  // User-level settings
+  notifyBilling  Boolean    @default(true)
+  notifyProduct  Boolean    @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  auditLogs      AuditLog[]
+  invitationsSent Invitation[] @relation("InvitedBy")
+
+  // Email is unique within an organization, not globally.
+  @@unique([organizationId, email])
+  @@index([organizationId])
+}
+
+model Invitation {
+  id             String     @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           Role
+  // SHA-256 of the raw token; the raw token is only ever in the invite email.
+  tokenHash      String     @unique
+  invitedById    String
+  invitedBy      User       @relation("InvitedBy", fields: [invitedById], references: [id])
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime   @default(now())
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  // Actor may be null for system-generated events (e.g. Stripe webhooks).
+  actorId        String?
+  actor          User?    @relation(fields: [actorId], references: [id])
+  actorEmail     String   // denormalized so logs survive user deletion
+  action         String   // e.g. "user.invited", "billing.plan_changed"
+  targetType     String?  // e.g. "user", "organization"
+  targetId       String?
+  metadata       Json?
+  ip             String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, action])
+}

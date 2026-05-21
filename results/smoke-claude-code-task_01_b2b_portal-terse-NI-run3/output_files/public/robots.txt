@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /users
+Disallow: /billing
+Disallow: /audit
+Disallow: /settings

@@ -1,0 +1,54 @@
+# Local / single-host deployment.
+# `docker compose up --build` brings up Postgres, a dev SMTP catcher, and the app.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: portal
+      POSTGRES_DB: portal
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Dev mail catcher — view sent email at http://localhost:8025
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://portal:portal@db:5432/portal?schema=public"
+      APP_URL: "http://localhost:3000"
+      SESSION_SECRET: "${SESSION_SECRET:-dev-only-secret-change-me-32-characters-min}"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET:-}"
+      STRIPE_PRICE_STARTER: "${STRIPE_PRICE_STARTER:-}"
+      STRIPE_PRICE_PRO: "${STRIPE_PRICE_PRO:-}"
+      STRIPE_PRICE_ENTERPRISE: "${STRIPE_PRICE_ENTERPRISE:-}"
+      SMTP_HOST: "mailhog"
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      EMAIL_FROM: "B2B Portal <no-reply@example.com>"
+      SAML_IDP_SSO_URL: "${SAML_IDP_SSO_URL:-}"
+      SAML_IDP_CERT: "${SAML_IDP_CERT:-}"
+    ports:
+      - "3000:3000"
+
+volumes:
+  db-data:
